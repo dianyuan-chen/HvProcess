@@ -1,0 +1,12 @@
+#ifndef NTC_LCFG_H__
+#define NTC_LCFG_H__
+
+#include "Ntc.h"
+
+<% for (var index = 0; index < temperatureSensors.length; index++) {
+    sensor = temperatureSensors[index]; %>
+#define NTC_<%- sensor.id %> <%- sensor.define %>U
+extern const NTC_ConfigDataType NTC_<%- sensor.id %>_ConfigData;
+<% } %>
+
+#endif

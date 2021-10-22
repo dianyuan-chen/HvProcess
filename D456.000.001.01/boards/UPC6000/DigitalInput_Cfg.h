@@ -1,0 +1,65 @@
+#ifndef DIGITALINPUT_CFG_H
+#define DIGITALINPUT_CFG_H
+
+#include "App_Types.h"
+
+#define DIGITALINPUT_DEV_ERROR_DETECT           STD_OFF
+
+/**
+ * \brief 数字输入类型
+ */
+#define DIGITALINPUT_TYPE_LEVEL                 0U
+#define DIGITALINPUT_TYPE_SWITCH                1U
+#define DIGITALINPUT_TYPE_WAKEUP_SIGNAL         2U
+#define DIGITALINPUT_TYPE_MAX                   DIGITALINPUT_TYPE_WAKEUP_SIGNAL
+
+/**
+ * \brief 数字输入通道
+ */
+#define DIGITALINPUT_BCU_SW_NUM                 2U
+#define DIGITALINPUT_BCU_DIN_NUM                2U
+
+#define DIGITALINPUT_SINGLE_BMU_SW_NUM          0U
+#define DIGITALINPUT_BMU_SW_NUM                 (DIGITALINPUT_SINGLE_BMU_SW_NUM * BCU_SLAVE_NUM_MAX)
+
+#define DIGITALINPUT_SINGLE_BMU_DIN_NUM         1U
+#define DIGITALINPUT_BMU_DIN_NUM                (DIGITALINPUT_SINGLE_BMU_DIN_NUM * BCU_SLAVE_NUM_MAX)
+
+
+#define DIGITALINPUT_BCU_DIN1                   0U
+#define DIGITALINPUT_BCU_DIN2                   1U
+
+#define DIGITALINPUT_BCU_SW1                    0U
+#define DIGITALINPUT_BCU_SW2                    1U
+
+#define DIGITALINPUT_CHANNEL_NONE               0xFFU
+
+
+#if DIGITALINPUT_SINGLE_BMU_DIN_NUM != 1U
+#define DIGITALINPUT_BMU_DIN_1(bmu)             ((DIGITALINPUT_BCU_DIN_NUM + (bmu * DIGITALINPUT_SINGLE_BMU_DIN_NUM)))
+#else
+#define DIGITALINPUT_BMU_DIN_1(bmu)             (DIGITALINPUT_BCU_DIN_NUM + (bmu))
+#endif
+
+#if DIGITALINPUT_SINGLE_BMU_SW_NUM > 1U
+#define DIGITALINPUT_BMU_SW_1(bmu)              ((DIGITALINPUT_BCU_SW_NUM + (bmu * DIGITALINPUT_SINGLE_BMU_SW_NUM)))
+#elif DIGITALINPUT_SINGLE_BMU_SW_NUM == 1U
+#define DIGITALINPUT_BMU_SW_1(bmu)              (DIGITALINPUT_BCU_SW_NUM + (bmu))
+#else
+#define DIGITALINPUT_BMU_SW_1(bmu)              (DIGITALINPUT_BCU_SW_NUM)
+#endif
+
+#if DIGITALINPUT_BMU_SW_NUM > 0U
+#define DIGITALINPUT_SW_NUM                     (DIGITALINPUT_BCU_SW_NUM + DIGITALINPUT_BMU_SW_NUM)
+#else
+#define DIGITALINPUT_SW_NUM                     (DIGITALINPUT_BCU_SW_NUM)
+#endif
+
+#if DIGITALINPUT_BMU_DIN_NUM > 0U
+#define DIGITALINPUT_DIN_NUM                    (DIGITALINPUT_BCU_DIN_NUM + DIGITALINPUT_BMU_DIN_NUM)
+#else
+#define DIGITALINPUT_DIN_NUM                    (DIGITALINPUT_BCU_DIN_NUM)
+#endif
+
+
+#endif

@@ -1,0 +1,13 @@
+
+FILE (GLOB_RECURSE THIS_DIR_SRC "*.c" "*.h")
+SET (SOURCE_FILES ${SOURCE_FILES} ${THIS_DIR_SRC} PARENT_SCOPE)
+SET (INCUDE_DIRS
+	${INCUDE_DIRS}
+    # ${CMAKE_CURRENT_LIST_DIR}/RelayControl_ert_rtw
+    # ${CMAKE_CURRENT_LIST_DIR}/BatSocCal_ert_rtw
+    # ${CMAKE_CURRENT_LIST_DIR}/DiagBatRunState_ert_rtw
+    # ${CMAKE_CURRENT_LIST_DIR}/DiagBatInitState_ert_rtw
+	${CMAKE_CURRENT_LIST_DIR}/Udan_SOC_ert_rtw
+    # ${CMAKE_CURRENT_LIST_DIR}/MBD_Insu_ert_rtw  
+    # ${CMAKE_CURRENT_LIST_DIR}/RelayControl_JL_ert_rtw 
+	PARENT_SCOPE)

@@ -1,0 +1,266 @@
+/**
+ * \file ParameterM_Lcfg.c
+ * \copyright UDAN Co.,Ltd. *
+ *
+ * \brief 参数管理链接配置文件.
+ *
+ * * \par 修订历史:
+ * | 版本号 | 修订日志 | 修改人 | 修订时间 |
+ * | :--- | :--- | :--- | :--- |
+ * | 0.1 | 初版本, 完成讨论部分的定义. | UD00004 | 20170209 |
+ */
+
+#include "AppParameterM.h"
+
+const ParameterM_DataType ParameterM_EeepParaDefault[] = {
+    <%- Math.round(EeepParaDefault.totalCap * 10) %>U, /**< PARAMETERM_EEEP_TOTAL_CAP_INDEX: 总容量 */
+    <%- Math.round(EeepParaDefault.leftCap * 10) %>U, /**< PARAMETERM_EEEP_LEFT_CAP_INDEX: 剩余容量 */
+    0U, /**< PARAMETERM_EEEP_DISCHARGE_CNT_INDEX: 充放电次数 */
+    0U, /**< PARAMETERM_EEEP_DISCHARGE_CNT_STATE_INDEX: 充放电次数状态 */
+    0U, /**< PARAMETERM_EEEP_HALL1_ZEROOFFSET_INDEX: HALL1零点电流校准值 */
+    0U, /**< PARAMETERM_EEEP_HALL2_ZEROOFFSET_INDEX: HALL2零点电流校准值 */
+    0U, /**< PARAMETERM_EEEP_SHUNT_ZEROOFFSET_INDEX: Shunt零点电流校准值 */
+    0U, /**< PARAMETERM_EEEP_OCVSOC_TIME_HIGH_INDEX: OCV-SOC校准时间高字节 */
+    0U, /**< PARAMETERM_EEEP_OCVSOC_TIME_LOW_INDEX: OCV-SOC校准时间低字节 */
+    0xFFFFU, /**< PARAMETERM_EEEP_VIN1_INDEX: VIN1 */
+    0xFFFFU, /**< PARAMETERM_EEEP_VIN2_INDEX: VIN2 */
+    0xFFFFU, /**< PARAMETERM_EEEP_VIN3_INDEX: VIN3 */
+    0xFFFFU, /**< PARAMETERM_EEEP_VIN4_INDEX: VIN4 */
+    0xFFFFU, /**< PARAMETERM_EEEP_VIN5_INDEX: VIN5 */
+    0xFFFFU, /**< PARAMETERM_EEEP_VIN6_INDEX: VIN6 */
+    0xFFFFU, /**< PARAMETERM_EEEP_VIN7_INDEX: VIN7 */
+    0xFFFFU, /**< PARAMETERM_EEEP_VIN8_INDEX: VIN8 */
+    0xFFFFU, /**< PARAMETERM_EEEP_VIN9_INDEX: VIN9 */
+    0xFFFFU, /**< PARAMETERM_EEEP_LEFTCAP_INTEGRAL_L_INDEX: 积分容量低字 */
+    0xFFFFU, /**< PARAMETERM_EEEP_LEFTCAP_INTEGRAL_H_INDEX: 积分容量高字 */
+    0U, /**< PARAMETERM_EEEP_CUMULATIVE_CHG_CAP_L_INDEX: 累计充电容量低字节 */
+    0U, /**< PARAMETERM_EEEP_CUMULATIVE_CHG_CAP_H_INDEX: 累计充电容量高字节 */
+    0U, /**< PARAMETERM_EEEP_CUMULATIVE_DCHG_CAP_L_INDEX: 累计放电容量低字节 */
+    0U, /**< PARAMETERM_EEEP_CUMULATIVE_DCHG_CAP_H_INDEX: 累计放电容量高字节 */
+    1000U, /**< PARAMETERM_EEEP_SHUNT_GAIN_ERROR_INDEX: 分流器增益误差 */
+    1000U, /**< PARAMETERM_EEEP_HALL1_GAIN_ERROR_INDEX: HALL1增益误差 */
+    1000U, /**< PARAMETERM_EEEP_HALL2_GAIN_ERROR_INDEX: HALL2增益误差 */
+    1000U, /**< PARAMETERM_EEEP_HV1_GAIN_ERROR_INDEX: HV1增益误差 */
+    1000U, /**< PARAMETERM_EEEP_HV2_GAIN_ERROR_INDEX: HV2增益误差 */
+    1000U, /**< PARAMETERM_EEEP_HV3_GAIN_ERROR_INDEX: HV3增益误差 */
+    1000U, /**< PARAMETERM_EEEP_HV4_GAIN_ERROR_INDEX: HV4增益误差 */
+    1000U, /**< PARAMETERM_EEEP_HV5_GAIN_ERROR_INDEX: HV5增益误差 */
+    1000U, /**< PARAMETERM_EEEP_HV6_GAIN_ERROR_INDEX: HV6增益误差 */
+    0U, /**< PARAMETERM_EEEP_DCHG_OLV_CNT_STATE_INDEX: 电池过放电计数状态变化，用于记录需掉电保存的状态 */
+    0U, /**< PARAMETERM_EEEP_DCHG_OLV_CNT_INDEX: 电池过放电计数 */
+    <%- Math.round((EeepParaDefault.totalCap * 3600 * 1000 - EeepParaDefault.totalCap * 0.2 * 3600 * 1000) / 65536) %>U, /**< PARAMETERM_EEEP_SOC_INDEX: 真实剩余容量：高16位 */
+    (uint16)(<%- (Math.round(EeepParaDefault.totalCap * 3600 * 1000 - EeepParaDefault.totalCap * 0.2 * 3600 * 1000) % 65536) %>U), /**< PARAMETERM_EEEP_tenthAmS_HIGH_INDEX: 真实剩余容量：低16位 */
+    8000U, /**< PARAMETERM_EEEP_MODEL_DSOC_INDEX: 显示SOC */
+    8000U, /**< PARAMETERM_EEEP_MODEL_TSOC_INDEX: 目标SOC */
+    0U,    /**< PARAMETERM_EEEP_POWER_LIMIT_INDEX: 限功率标志位 */
+    65535U,    /**< PARAMETERM_EEEP_SOH_Full_INDEX: SOH计算的标志位 */
+    1000U, /**< PARAMETERM_EEEP_SOH_INDEX: 初始SOH */
+    0U,    /**< PARAMETERM_EEEP_LEFTCAP_WOCALIB_H_INDEX: SOH计算的累积电量高16位 */
+    0U,    /**< PARAMETERM_EEEP_LEFTCAP_WOCALIB_L_INDEX: SOH计算的累积电量低16位 */
+    0U, /**< 44: 保留 */
+    0U, /**< 45: 保留 */
+    0U, /**< 46: 保留 */
+    0U, /**< 47: 保留 */
+    0U, /**< 48: 保留 */
+    0U, /**< 49: 保留 */
+    0U, /**< 50: 保留 */
+    0U, /**< 51: 保留 */
+    0U, /**< 52: 保留 */
+    0U, /**< 53: 保留 */
+    0U, /**< 54: 保留 */
+    0U, /**< 55: 保留 */
+    0U, /**< 56: 保留 */
+    0U, /**< 57: 保留 */
+    0U, /**< 58: 保留 */
+    0U, /**< 59: 保留 */
+    0U, /**< 60: 保留 */
+    0U, /**< 61: 保留 */
+    0U, /**< 62: 保留 */
+    0U, /**< 63: 保留 */
+    0U, /**< 64: 保留 */
+    0U, /**< 65: 保留 */
+    0U, /**< 66: 保留 */
+    0U, /**< 67: 保留 */
+    0U, /**< 68: 保留 */
+    0U, /**< 69: 保留 */
+    0U, /**< 70: 保留 */
+    0U, /**< 71: 保留 */
+    0U, /**< 72: 保留 */
+    0U, /**< 73: 保留 */
+    0U, /**< 74: 保留 */
+    0U, /**< 75: 保留 */
+    0U, /**< 76: 保留 */
+    0U, /**< 77: 保留 */
+    0U, /**< 78: 保留 */
+    0U, /**< 79: 保留 */
+    0U, /**< 80: 保留 */
+    0U, /**< 81: 保留 */
+    0U, /**< 82: 保留 */
+    0U, /**< 83: 保留 */
+    0U, /**< 84: 保留 */
+    0U, /**< 85: 保留 */
+    0U, /**< 86: 保留 */
+    0U, /**< 87: 保留 */
+    0U, /**< 88: 保留 */
+    0U, /**< 89: 保留 */
+    0U, /**< 90: 保留 */
+    0U, /**< 91: 保留 */
+    0U, /**< 92: 保留 */
+    0U, /**< 93: 保留 */
+    0U, /**< 94: 保留 */
+    0U, /**< 95: 保留 */
+    0U, /**< 96: 保留 */
+    0U, /**< 97: 保留 */
+    0U, /**< 98: 保留 */
+    0U, /**< 99: 保留 */
+    0U, /**< 100: 保留 */
+    0U, /**< 101: 保留 */
+    0U, /**< 102: 保留 */
+    0U, /**< 103: 保留 */
+    0U, /**< 104: 保留 */
+    0U, /**< 105: 保留 */
+    0U, /**< 106: 保留 */
+    0U, /**< 107: 保留 */
+    0U, /**< 108: 保留 */
+    0U, /**< 109: 保留 */
+    0U, /**< 110: 保留 */
+    0U, /**< 111: 保留 */
+    0U, /**< 112: 保留 */
+    0U, /**< 113: 保留 */
+    0U, /**< 114: 保留 */
+    0U, /**< 115: 保留 */
+    0U, /**< 116: 保留 */
+    0U, /**< 117: 保留 */
+    1U, /**< PARAMETERM_EEEP_REMOTEABLE_COMMAND_INDEX: 远程使能命令 */
+    0U, /**< PARAMETERM_EEEP_REMOTELINK_TIME_HIGH_INDEX: 远程均衡命令下发时间高字 */
+    0U, /**< PARAMETERM_EEEP_REMOTELINK_TIME_LOW_INDEX: 远程均衡命令下发时间低字 */
+    <%- Math.round(EeepParaDefault.nominalCap * 10) %>U, /**< PARAMETERM_EEEP_NOMINAL_CAP_INDEX: 额定容量 */
+    0U, /**< PARAMETERM_EEEP_CUMULATIVE_CHG_TIME_L_INDEX: 累计充电时间低字 精度：1S/bit */
+    0U, /**< PARAMETERM_EEEP_CUMULATIVE_CHG_TIME_H_INDEX: 累计充电时间高字 精度：1S/bit */
+    0U, /**< PARAMETERM_EEEP_CUMULATIVE_DCHG_TIME_L_INDEX: 累计放电时间低字 精度：1S/bit */
+    0U, /**< PARAMETERM_EEEP_CUMULATIVE_DCHG_TIME_H_INDEX: 累计放电时间高字 精度：1S/bit */
+    <%- SocEfficiency.chargeIntegralEfficiency * 10 %>U, /**< PARAMETERM_EEEP_CHARGE_INTEGRAL_EFFICIENCY: 充电效率因子 精度：0.1% */
+    <%- SocEfficiency.dischargeIntegralEfficiency * 10 %>U, /**< PARAMETERM_EEEP_DCHARGE_INTEGRAL_EFFICIENCY: 放电效率因子 精度：0.1% */
+};
+
+const ParameterM_EeepParaIndexType ParameterM_EeepParaNum = (ParameterM_EeepParaIndexType)(ARRAY_SIZE(ParameterM_EeepParaDefault));
+const ParameterM_ConfigInfoType ParameterM_ConfigInfo = {
+    PARAMETERM_EEEP_LOWER_INDEX_END, /**< 低段参数索引结束(不单独占用一个索引) */
+    PARAMETERM_EEEP_HIGHER_INDEX_START, /**< 高段参数索引起始(不单独占用一个索引) */
+};
+
+static const AppParameterM_CalibParaType AppParameterM_CalibParaConfigInfo = {
+{
+        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+    {{<%
+    var i = 0;
+    for (var param of diagparams) {
+        if (!param.calibrate) continue; %>
+        {{/* <%- i %> <%- JSON.stringify(param) %>*/<%
+        var levelIndex = 0;
+        for (var lvl of param.levels) {
+            var lvl = (levelIndex < param.validLevels) ? param.mapper(lvl) : lvl;
+            levelIndex++; %>
+            {<%- lvl[0] %>U, <%- lvl[1] %>U, <%- lvl[2] %>U, <%- lvl[3] %>U},<%
+        }
+        %>
+        }},<%
+        i++;
+    }
+    %>
+    }},
+    { /* <%- JSON.stringify(SocEfficiency) %> */
+        <%- SocEfficiency.chargeIntegralEfficiency * 10 %>U, /**< ChargeIntegralEfficiency: 充电效率因子(弃用) 精度：0.1% */
+        <%- SocEfficiency.dischargeIntegralEfficiency * 10 %>U, /**< DischargeIntegralEfficiency: 放电效率因子(弃用) 精度：0.1% */
+    },
+
+    { /* <%- JSON.stringify(SocCalibParam) %> */
+        <%- SocCalibParam.capHighCalibAverageVolt %>U, /**< CapHighCalibAverageVolt: 过充容量校正平均电压阈值 */
+        <%- SocCalibParam.capLowCalibAverageVolt %>U, /**< CapLowCalibAverageVolt: 过放容量校正平均电压阈值 */
+        <%- SocCalibParam.capLowCalibSoc * 10 %>U, /**< CapLowCalibSoc: 过放容量校正SOC阈值 */
+        <%- Math.round(100 * SocCalibParam.capLowCalibDelay) %>U, /**< CapLowCalibDelay: 过放容量校正延时 */
+    },
+    {
+        // AC
+        { /* <%- JSON.stringify(ACChargeParam) %> */
+            <%- ACChargeParam.chargeTotalVoltMax * 10 %>U, /**< chargeTotalVoltMax: 最高允许充电总压 */ /*lint !e524 */
+            <%- ACChargeParam.chargeCurrentMax *10 %>U, /**< chargeCurrentMax: 最高允许充电电流 */
+            <%- ACChargeParam.chargeCurrentMin *10 %>U, /**< chargeCurrentMin: 最小允许充电电流(截止充电电流) */
+            <%- ACChargeParam.fullChargeRelTotalVolt * 10 %>U, /**< fullChargeRelTotalVolt: 满充释放总压 */ /*lint !e524 */
+        },
+        // DC
+        { /* <%- JSON.stringify(DCChargeParam) %> */
+            <%- DCChargeParam.chargeTotalVoltMax * 10 %>U, /**< chargeTotalVoltMax: 最高允许充电总压 */ /*lint !e524 */
+            <%- DCChargeParam.chargeCurrentMax *10 %>U, /**< chargeCurrentMax: 最高允许充电电流 */
+            <%- DCChargeParam.chargeCurrentMin *10 %>U, /**< chargeCurrentMin: 最小允许充电电流(截止充电电流) */
+            <%- DCChargeParam.fullChargeRelTotalVolt * 10 %>U, /**< fullChargeRelTotalVolt: 满充释放总压 */ /*lint !e524 */
+        },
+    },
+},
+{
+        {/* <%- JSON.stringify(TemperatureMPara.ChargeHeat) %> */
+            <%- TemperatureMPara.ChargeHeat.temperatureOn %>U, /**< 开启温度 */
+            <%- TemperatureMPara.ChargeHeat.deltaTemperatureOn %>U, /**< 开启温差 */
+            <%- TemperatureMPara.ChargeHeat.temperatureOnDelay %>U, /**< 开启温度延时 */
+            <%- TemperatureMPara.ChargeHeat.deltaTemperatureOnDelay %>U, /**< 开启温差延时 */
+            <%- TemperatureMPara.ChargeHeat.temperatureOff %>U, /**< 关闭温度 */
+            <%- TemperatureMPara.ChargeHeat.deltaTemperatureOff %>U, /**< 关闭温差 */
+            <%- TemperatureMPara.ChargeHeat.temperatureOffDelay %>U, /**< 关闭温度延时 */
+            <%- TemperatureMPara.ChargeHeat.deltaTemperatureOffDelay %>U, /**< 关闭温差延时 */
+        },
+        {/* <%- JSON.stringify(TemperatureMPara.DischargeHeat) %> */
+            <%- TemperatureMPara.DischargeHeat.temperatureOn %>U, /**< 开启温度 */
+            <%- TemperatureMPara.DischargeHeat.deltaTemperatureOn %>U, /**< 开启温差 */
+            <%- TemperatureMPara.DischargeHeat.temperatureOnDelay %>U, /**< 开启温度延时 */
+            <%- TemperatureMPara.DischargeHeat.deltaTemperatureOnDelay %>U, /**< 开启温差延时 */
+            <%- TemperatureMPara.DischargeHeat.temperatureOff %>U, /**< 关闭温度 */
+            <%- TemperatureMPara.DischargeHeat.deltaTemperatureOff %>U, /**< 关闭温差 */
+            <%- TemperatureMPara.DischargeHeat.temperatureOffDelay %>U, /**< 关闭温度延时 */
+            <%- TemperatureMPara.DischargeHeat.deltaTemperatureOffDelay %>U, /**< 关闭温差延时 */
+        },
+        {/* <%- JSON.stringify(TemperatureMPara.ChargeRefrigeration) %> */
+            <%- TemperatureMPara.ChargeRefrigeration.temperatureOn %>U, /**< 开启温度 */
+            <%- TemperatureMPara.ChargeRefrigeration.deltaTemperatureOn %>U, /**< 开启温差 */
+            <%- TemperatureMPara.ChargeRefrigeration.temperatureOnDelay %>U, /**< 开启温度延时 */
+            <%- TemperatureMPara.ChargeRefrigeration.deltaTemperatureOnDelay %>U, /**< 开启温差延时 */
+            <%- TemperatureMPara.ChargeRefrigeration.temperatureOff %>U, /**< 关闭温度 */
+            <%- TemperatureMPara.ChargeRefrigeration.deltaTemperatureOff %>U, /**< 关闭温差 */
+            <%- TemperatureMPara.ChargeRefrigeration.temperatureOffDelay %>U, /**< 关闭温度延时 */
+            <%- TemperatureMPara.ChargeRefrigeration.deltaTemperatureOffDelay %>U, /**< 关闭温差延时 */
+        },
+        {/* <%- JSON.stringify(TemperatureMPara.DischargeRefrigeration) %> */
+            <%- TemperatureMPara.DischargeRefrigeration.temperatureOn %>U, /**< 开启温度 */
+            <%- TemperatureMPara.DischargeRefrigeration.deltaTemperatureOn %>U, /**< 开启温差 */
+            <%- TemperatureMPara.DischargeRefrigeration.temperatureOnDelay %>U, /**< 开启温度延时 */
+            <%- TemperatureMPara.DischargeRefrigeration.deltaTemperatureOnDelay %>U, /**< 开启温差延时 */
+            <%- TemperatureMPara.DischargeRefrigeration.temperatureOff %>U, /**< 关闭温度 */
+            <%- TemperatureMPara.DischargeRefrigeration.deltaTemperatureOff %>U, /**< 关闭温差 */
+            <%- TemperatureMPara.DischargeRefrigeration.temperatureOffDelay %>U, /**< 关闭温度延时 */
+            <%- TemperatureMPara.DischargeRefrigeration.deltaTemperatureOffDelay %>U, /**< 关闭温差延时 */
+        },
+},
+};
+
+const ParameterM_CalibParaType *const ParameterM_PFlashCalibParaPtr = &AppParameterM_CalibParaConfigInfo.rtePara;
+
+
+const Diagnosis_ParaType ParameterM_NoneCalibrateDiagConfig[((uint8)DIAGNOSIS_ITEM_NONE_CALIBRATE_STOP - (uint8)DIAGNOSIS_ITEM_NONE_CALIBRATE_START) + 1U] =
+{
+<%
+var i = 0;
+for (var param of diagparams) {
+    if (param.calibrate) continue; %>%>
+    {{/* DIAGNOSIS_ITEM_NONE_CALIBRATE_START + <%- i %> <%- JSON.stringify(param) %>*/<%
+    var levelIndex = 0;
+    for (var lvl of param.levels) {
+        var lvl = (levelIndex < param.validLevels) ? param.mapper(lvl) : lvl;
+        levelIndex++; %>
+        {<%- lvl[0] %>U, <%- lvl[1] %>U, <%- lvl[2] %>U, <%- lvl[3] %>U},<%
+    }
+    %>
+    }},<%
+    i++;
+}
+%>
+
+};

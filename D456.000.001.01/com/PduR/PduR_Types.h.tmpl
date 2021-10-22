@@ -1,0 +1,48 @@
+#ifndef PDUR_TYPES_H__
+#define PDUR_TYPES_H__
+
+
+/*
+<%- JSON.stringify(data, null, '    ') %>
+
+*/
+
+<%
+var index = 0;
+for (var v of data.uppers) {%>
+#define PDUR_<%-v.toUpperCase()%>  <%-index%>U<%
+    index++;%>
+#define PDUR_<%-v.toUpperCase()%>_TX_PDUID_MAX  <%- data[v].txs.length - 1%>U
+#define PDUR_<%-v.toUpperCase()%>_TX_PDUID_NUM  <%- data[v].txs.length %>U
+<%
+}
+
+for (var v of data.middles) {%>
+#define PDUR_<%-v.toUpperCase()%>  <%-index%>U<%
+    index++;
+}%>
+
+<%
+for (var v of data.uppers) {
+    var num = 0;
+    for (var rx of data.rxs) {
+        if (rx.upper[0] ==  v) {
+            num = num + 1;
+        }
+    }
+%>
+#define PDUR_<%-v.toUpperCase()%>_RX_PDUID_NUM  <%- num %>U<%
+}
+%>
+
+<%for (var v of data.txs) {%>
+// <%- JSON.stringify(v) %>
+#define PDUR_<%- v.upper[0].toUpperCase() %>_TX_PDUID_<%- v.upper[2].toUpperCase() %> <%- v.upper[1] %>U<%
+}%>
+
+<%for (var v of data.rxs) {%>
+// <%- JSON.stringify(v) %>
+#define PDUR_<%- v.upper[0].toUpperCase() %>_RX_PDUID_<%- v.upper[2].toUpperCase() %> <%- v.upper[1] %>U<%
+}%>
+
+#endif

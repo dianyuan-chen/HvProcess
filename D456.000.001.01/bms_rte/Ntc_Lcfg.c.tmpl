@@ -1,0 +1,49 @@
+#include "ChgSckTmpM.h"
+#include "Ntc_Lcfg.h"
+
+<% for (var index = 0; index < temperatureSensors.length; index++) {
+    sensor = temperatureSensors[index]; %>
+static const uint16 NTC_<%- sensor.id %>_V4096[] = {<%
+    var xindex = 0;
+    for (var vol of sensor.vols) {
+        if (xindex % 10 == 0) {%>
+    <% } %><%- vol %>U, <%
+        xindex++;
+    } %>
+};
+
+const NTC_ConfigDataType NTC_<%- sensor.id %>_ConfigData = {
+    NTC_<%- sensor.id %>,
+    <%- sensor.start %>,
+    (uint8)ARRAY_SIZE(NTC_<%- sensor.id %>_V4096),
+    <%- sensor.isPtOrder ? 1 : 0%>U,
+    NTC_<%- sensor.id %>_V4096
+};
+<% } %>
+
+/* <%- JSON.stringify(chgSckTempEnable) %> */
+const ChgSckTmpM_ConfigType ChgSckTmpM_ConfigInfo = {
+    {
+    { <%- chgSckTempEnable.DC_POSITIVE %> },
+    { <%- chgSckTempEnable.DC_NEGATIVE %> },
+    { <%- chgSckTempEnable.AC_AL %> },
+    { <%- chgSckTempEnable.AC_BN %> },
+    { <%- chgSckTempEnable.AC_C %> },
+    }
+};
+
+const NTC_ConfigDataType *const CellNTCConfigData = &NTC_<%- cellTempType %>_ConfigData;
+const NTC_ConfigDataType *const DCChgSckNTCConfigData = &NTC_<%- dcChgSckTempType %>_ConfigData;
+const NTC_ConfigDataType *const ACChgSckNTCConfigData = &NTC_<%- acChgSckTempType %>_ConfigData;
+const NTC_ConfigDataType *const OnboardNTCConfigData = &NTC_Shiheng_CWF4B_103F_3435B_ConfigData;
+
+/* <%- JSON.stringify(chgSckAdcToTempChannleMap) %> */
+const uint8 ChgSckTmpM_AdcToTempChannelMap[] = { <%
+for (var x of ['FCH_T1', 'FCH_T2', 'SCH_T1', 'SCH_T2', 'SCH_T3']) { %><%
+    if (chgSckAdcToTempChannleMap.hasOwnProperty(x)) { %>
+    CHGSCKTMPM_TEMPERATURE_<%- chgSckAdcToTempChannleMap[x] %>,   /* <%- x %> */ <%
+    } else { %>
+    CHGSCKTMPM_TEMPERATURE_CHANEL_NUM,   /* <%- x %> */<%
+    } %><%
+} %>
+};

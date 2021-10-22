@@ -1,0 +1,34 @@
+#include "ComStack_Types.h"
+#include "PduR_Lcfg.h"
+
+<%
+var incs = txs.reduce((acc, x)=>{
+    if (acc.indexOf(x.name)<0) acc.push(x.name);
+    return acc;
+}, []);
+
+for(var x of incs) {
+    if (x != "None") {%>
+#include "<%-x%>.h"<%
+    }
+}%>
+
+Std_ReturnType PduR_<%-module%>Transmit(PduIdType PduId, const PduInfoType* PduInfoPtr)
+{
+    Std_ReturnType res = E_NOT_OK;
+
+    if (PduId < PDUR_CFG_<%-module.toUpperCase()%>_PDUID_NUM)
+    {
+        switch(PduR_Config-><%-module%>PduIdConfig[PduId].Module)
+        {<%
+        for (var v of txmiddles) {%>
+            case PDUR_<%-v.toUpperCase()%>:
+                res = <%-v%>_Transmit(PduR_Config-><%-module%>PduIdConfig[PduId].PduId, PduInfoPtr);
+                break;<%
+        }%>
+            default:
+                break;
+        }
+    }
+    return res;
+}

@@ -1,0 +1,101 @@
+#include "InnerTp_Lcfg.h"
+#include "AllInOneComm.h"
+
+<% if (UseIslAllInOne) {%>
+#include "Isl78600Comm.h"
+<% } else if (UseLtcAllInOne || M36Num > 0) {%>
+#include "Ltc6804Comm.h"
+<% } %>
+
+#include "RingBuffer.h"
+
+RINGBUFFER_DEFINE_STATIC(cmdRingBuffer, 40U);
+static uint8 requestDataBuffer[40];
+
+
+<% if (UseIslAllInOne) {%>
+
+static const InnerTp_RequestHandlerType handlerAllInOne = {
+    0U, /* PduIdType cmdPduId */
+    0U, /* PduIdType replyPduId */
+    Isl78600Comm_HandlerAllInOne, /* void (*handle)(const struct InnerTp_RequestHandler* requestHandler, PduInfoType *InfoPtr); */
+};
+
+const InnerTp_ConfigDataType InnerTpConfigData = {
+    1U, /* uint8 requestHandlerNumber */
+    &handlerAllInOne, /* InnerTp_RequestHandlerType *requestHandlers; */
+    &cmdRingBuffer, /* RingBuffer_Type *requestRingBuffer; */
+    (uint8)sizeof(requestDataBuffer), /* uint8 requestDataBufferLength; */
+    requestDataBuffer, /* uint8 *requestDataBuffer; */
+};
+
+<% } else if (UseLtcAllInOne && M36Num == 0) {%>
+
+static const InnerTp_RequestHandlerType handlerAllInOne = {
+    0U, /* PduIdType cmdPduId */
+    0U, /* PduIdType replyPduId */
+    Ltc6804Comm_HandlerAllInOne, /* void (*handle)(const struct InnerTp_RequestHandler* requestHandler, PduInfoType *InfoPtr); */
+};
+
+const InnerTp_ConfigDataType InnerTpConfigData = {
+    1U, /* uint8 requestHandlerNumber */
+    &handlerAllInOne, /* InnerTp_RequestHandlerType *requestHandlers; */
+    &cmdRingBuffer, /* RingBuffer_Type *requestRingBuffer; */
+    (uint8)sizeof(requestDataBuffer), /* uint8 requestDataBufferLength; */
+    requestDataBuffer, /* uint8 *requestDataBuffer; */
+};
+
+<%} else if (M36Num > 0) {%>
+static const InnerTp_RequestHandlerType handlerM630[] = {
+    <% for (var i = 0; i < M36Num; i++) {%>
+    {
+        <%- i %>U, /* PduIdType cmdPduId */
+        <%- i %>U, /* PduIdType replyPduId */
+        Ltc6804Comm_HandlerM630, /* void (*handle)(const struct InnerTp_RequestHandler* requestHandler, PduInfoType *InfoPtr); */
+    },
+    <% } %>
+};
+const InnerTp_ConfigDataType InnerTpConfigData = {
+    (uint8)ARRAY_SIZE(handlerM630), /* uint8 requestHandlerNumber */
+    handlerM630, /* InnerTp_RequestHandlerType *requestHandlers; */
+    &cmdRingBuffer, /* RingBuffer_Type *requestRingBuffer; */
+    (uint8)sizeof(requestDataBuffer), /* uint8 requestDataBufferLength; */
+    requestDataBuffer, /* uint8 *requestDataBuffer; */
+};
+<% } else {%>
+const InnerTp_ConfigDataType InnerTpConfigData = {
+    0U, /* uint8 requestHandlerNumber */
+    NULL, /* InnerTp_RequestHandlerType *requestHandlers; */
+    &cmdRingBuffer, /* RingBuffer_Type *requestRingBuffer; */
+    (uint8)sizeof(requestDataBuffer), /* uint8 requestDataBufferLength; */
+    requestDataBuffer, /* uint8 *requestDataBuffer; */
+};
+
+<% } %>
+
+<% if (UseIslAllInOne || UseLtcAllInOne) {%>
+extern Async_LooperType InternalComm_TxLooper;
+<% } %>
+Std_ReturnType AllInOneComm_Init(uint8 pri, boolean istestmode) {
+<% if (UseIslAllInOne) {%>
+    Std_ReturnType ret = E_NOT_OK;
+    Async_LooperType *looper;
+    looper = Isl78600Comm_Init(pri, istestmode);
+    if (looper != NULL) {
+        ret = InnerTp_Init(&InternalComm_TxLooper, &InnerTpConfigData);
+    }
+    return ret;
+<% } else if (UseLtcAllInOne) {%>
+    Std_ReturnType ret = E_NOT_OK;
+    Async_LooperType *looper;
+    looper = Ltc6804Comm_Init(pri, istestmode);
+    if (looper != NULL) {
+        ret = InnerTp_Init(&InternalComm_TxLooper, &InnerTpConfigData);
+    }
+    return ret;
+<% } else {%>
+    (void)pri;
+    (void)istestmode;
+    return E_OK;
+<% } %>
+}

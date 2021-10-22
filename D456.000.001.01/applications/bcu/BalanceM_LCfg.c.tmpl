@@ -1,0 +1,48 @@
+#include "BalanceM.h"
+
+<%
+if (Remote.enable) {
+    if (!Remote.hasOwnProperty('condition')) {
+        throw('Remote must hasOwnProperty condition');
+    }
+
+    if (!Remote.condition.hasOwnProperty('func')) {
+        throw('Remote.condition must hasOwnProperty func');
+    }
+}
+%>
+
+<% if (Remote.enable && Remote.condition.inc) {%>
+#include "<%- Remote.condition.inc %>"
+<%}%>
+
+const BalanceM_ConfigType BalanceM_ConfigInfo = {
+    BALANCEM_BALANCE_PASSTIVE, /**< type */
+    /**< 充电均衡配置参数 */
+    {
+        <%- Charging.enable ? "STD_ON" : "STD_OFF" %>, /**< balance_en */
+        <%- Charging.startVoltage %>U, /**< start_voltage */
+        <%- Charging.minVoltage %>U, /**< voltage_min */
+        <%- Charging.minDiffVoltage %>U, /**< delta_volt_min */
+        <%- Charging.maxDiffVoltage %>U, /**< delta_volt_max */
+    },
+    /**< 静态均衡配置参数 */
+    {
+        <%- Static.enable ? "STD_ON" : "STD_OFF" %>, /**< balance_en */
+        <%- Static.startVoltage %>U, /**< start_voltage */
+        <%- Static.minVoltage %>U, /**< voltage_min */
+        <%- Static.minDiffVoltage %>U, /**< delta_volt_min */
+        <%- Static.maxDiffVoltage %>U, /**< delta_volt_max */
+    },
+    /**< 远程均衡配置 */
+    {
+        <%- Remote.enable ? "STD_ON" : "STD_OFF" %>, /**< balance_en */
+        <% if (Remote.enable) {%><%- Remote.condition.func %>,
+        <% } else {%>NULL,
+        <%}%><%- Math.max(Remote.enableDefaultBalanceTime,1860) %>U, /**< max_disconnect_time */
+    },
+    DIAGNOSIS_LEVEL_THIRD, /**< disable_bal_ht_level */
+    DIAGNOSIS_LEVEL_THIRD, /**< disable_bal_lv_level */
+    BALANCEM_REFERENCE_AVERAGE, /**< reference */
+    CURRENT_100MA_FROM_A(3U), /**< current_max */
+};

@@ -1,0 +1,78 @@
+#include "PduR_Lcfg.h"
+
+<%var i;%>
+
+<%
+for (var v of data.uppers) {%>
+/*<%-v%>*/
+const PduR_PduIdConfigType PduR_PduIdConfig_<%- v %>[] = {<%
+    i = 0;
+    for (var x of data[v].txs) {%>
+    /* <%-i%>  <%-JSON.stringify(x)%>*/
+    {PDUR_<%-x.name.toUpperCase()%>/*Module*/, <%-x.id%>U/*PduId*/},<%
+        i++;
+    }%>
+};
+<%}
+
+for (var v of data.middles) {%>
+#if <%- data[v].txs.length %> != 0
+/*<%-v%> TX*/
+const PduR_PduIdConfigType PduR_PduIdConfig_<%- v %>_TX[] = {<%
+    i = 0;
+    for (var x of data[v].txs) {%>
+    /* <%-i%>  <%-JSON.stringify(x)%>*/
+    {PDUR_<%-x.name.toUpperCase()%>/*Module*/, <%-x.id%>U/*PduId*/},<%
+        i++;
+    }%>
+};
+#endif
+
+#if <%- data[v].rxs.length %> != 0
+/*<%-v%> RX*/
+const PduR_PduIdConfigType PduR_PduIdConfig_<%- v %>_RX[] = {<%
+    i = 0;
+    for (var x of data[v].rxs) {%>
+        /*<%-i%>  <%-JSON.stringify(x)%>*/
+        {PDUR_<%-x.name.toUpperCase()%>/*Module*/, <%-x.id%>U/*PduId*/},<%
+        i++;
+    }%>
+};
+#endif
+<%}%>
+
+<%
+for (var v of ["Dcm", "ChargerComm", "InternalComm", "VcuComm"]) {
+    if (data.uppers.indexOf(v) < 0) {%>
+#define PduR_PduIdConfig_<%- v %> NULL<%
+    }
+}
+
+for (var v of ["CanTp", "DtuTp", "J1939Tp", "InnerTp"]) {
+    if (data.middles.indexOf(v) < 0 || data[v].txs.length == 0) {%>
+#define PduR_PduIdConfig_<%- v %>_TX NULL<%
+    }
+    if (data.middles.indexOf(v) < 0 || data[v].rxs.length == 0) {%>
+#define PduR_PduIdConfig_<%- v %>_RX NULL<%
+    }
+}
+%>
+
+const PduR_ConfigType PduR_ConfigInfo = {
+    // Upper layer
+    PduR_PduIdConfig_Dcm, // const PduR_PduIdConfigType *DcmPduIdConfig;
+    PduR_PduIdConfig_ChargerComm, // const PduR_PduIdConfigType *ChargerCommPduIdConfig;
+    PduR_PduIdConfig_InternalComm, // const PduR_PduIdConfigType *InternalCommPduIdConfig;
+    PduR_PduIdConfig_VcuComm, // const PduR_PduIdConfigType *VcuCommPduIdConfig;
+    PduR_PduIdConfig_ExternCanComm, // const PduR_PduIdConfigType *ExternCanCommPduIdConfig;
+
+    // Tp layer
+    PduR_PduIdConfig_CanTp_TX, // const PduR_PduIdConfigType *CanTpTxPduIdConfig;
+    PduR_PduIdConfig_CanTp_RX, // const PduR_PduIdConfigType *CanTpRxPduIdConfig;
+    PduR_PduIdConfig_DtuTp_TX, // const PduR_PduIdConfigType *DtuTpTxPduIdConfig;
+    PduR_PduIdConfig_DtuTp_RX, // const PduR_PduIdConfigType *DtuTpRxPduIdConfig;
+    PduR_PduIdConfig_J1939Tp_TX, // const PduR_PduIdConfigType *J1939TpTxPduIdConfig;
+    PduR_PduIdConfig_J1939Tp_RX, // const PduR_PduIdConfigType *J1939TpRxPduIdConfig;
+    PduR_PduIdConfig_InnerTp_TX, // const PduR_PduIdConfigType *InnerTpTxPduIdConfig;
+    PduR_PduIdConfig_InnerTp_RX, // const PduR_PduIdConfigType *InnerTpRxPduIdConfig;
+};

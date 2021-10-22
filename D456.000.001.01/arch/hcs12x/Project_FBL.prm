@@ -1,0 +1,169 @@
+/* This is a linker parameter file for the MC9S12XEP100 */
+
+/*
+This file is setup to use the HCS12X core only.
+If you plan to also use the XGATE in your project, best create a new project with the
+'New Project Wizard' (File|New... menu in the CodeWarrior IDE) and choose the appropriate
+project parameters.
+*/
+
+NAMES
+    /* CodeWarrior will pass all the needed files to the linker by command line. But here you may add your additional files */
+END
+
+SEGMENTS /* here all RAM/ROM areas of the device are listed. Used in PLACEMENT below. All addresses are 'logical' */
+/* Register space  */
+/*    IO_SEG        = PAGED                            0x0000 TO   0x07FF; intentionally not defined */
+/* non-paged EEPROM */
+      EEPROM        = READ_ONLY   DATA_NEAR IBCC_NEAR  0x0C00 TO   0x0EFF;
+      EEE1_RAM      = READ_ONLY   DATA_NEAR IBCC_NEAR  0x0F00 TO   0x0FFF;
+/* non-paged RAM */
+      RAM_FOR_CODE  = READ_WRITE  DATA_NEAR            0x2000 TO   0x2FFF ALIGN 2[1:1]; /* word align for XGATE accesses */
+      RAM_FOR_DATA  = READ_WRITE  DATA_NEAR            0x3000 TO   0x39FF ALIGN 2[1:1]; /* word align for XGATE accesses */
+      RAM_FOR_FBL   = READ_WRITE  DATA_NEAR            0x3A00 TO   0x3FFF ALIGN 2[1:1]; /* word align for XGATE accesses */
+/* non-banked FLASH */
+      ROM_4000      = READ_ONLY   DATA_NEAR IBCC_NEAR  0x4000 TO   0x7F0F;
+      ROM_C000      = READ_ONLY   DATA_NEAR IBCC_NEAR  0xC000 TO   0xEFDF;
+      BOOT_VECTOR   = READ_ONLY                        0xFF10 TO   0xFFFF;
+
+/* paged EEPROM                                        0x0800 TO   0x0BFF; addressed through EPAGE */
+      EEPROM_00     = READ_ONLY   DATA_FAR IBCC_FAR  0x000800 TO 0x000BFF;
+      EEPROM_01     = READ_ONLY   DATA_FAR IBCC_FAR  0x010800 TO 0x010BFF;
+      EEPROM_02     = READ_ONLY   DATA_FAR IBCC_FAR  0x020800 TO 0x020BFF;
+      EEPROM_03     = READ_ONLY   DATA_FAR IBCC_FAR  0x030800 TO 0x030BFF;
+      EEPROM_04     = READ_ONLY   DATA_FAR IBCC_FAR  0x040800 TO 0x040BFF;
+      EEPROM_05     = READ_ONLY   DATA_FAR IBCC_FAR  0x050800 TO 0x050BFF;
+      EEPROM_06     = READ_ONLY   DATA_FAR IBCC_FAR  0x060800 TO 0x060BFF;
+      EEPROM_07     = READ_ONLY   DATA_FAR IBCC_FAR  0x070800 TO 0x070BFF;
+      EEPROM_08     = READ_ONLY   DATA_FAR IBCC_FAR  0x080800 TO 0x080BFF;
+      EEPROM_09     = READ_ONLY   DATA_FAR IBCC_FAR  0x090800 TO 0x090BFF;
+      EEPROM_0A     = READ_ONLY   DATA_FAR IBCC_FAR  0x0A0800 TO 0x0A0BFF;
+      EEPROM_0B     = READ_ONLY   DATA_FAR IBCC_FAR  0x0B0800 TO 0x0B0BFF;
+      EEPROM_0C     = READ_ONLY   DATA_FAR IBCC_FAR  0x0C0800 TO 0x0C0BFF;
+      EEPROM_0D     = READ_ONLY   DATA_FAR IBCC_FAR  0x0D0800 TO 0x0D0BFF;
+      EEPROM_0E     = READ_ONLY   DATA_FAR IBCC_FAR  0x0E0800 TO 0x0E0BFF;
+      EEPROM_0F     = READ_ONLY   DATA_FAR IBCC_FAR  0x0F0800 TO 0x0F0BFF;
+      EEPROM_10     = READ_ONLY   DATA_FAR IBCC_FAR  0x100800 TO 0x100BFF;
+      EEPROM_11     = READ_ONLY   DATA_FAR IBCC_FAR  0x110800 TO 0x110BFF;
+      EEPROM_12     = READ_ONLY   DATA_FAR IBCC_FAR  0x120800 TO 0x120BFF;
+      EEPROM_13     = READ_ONLY   DATA_FAR IBCC_FAR  0x130800 TO 0x130BFF;
+      EEPROM_14     = READ_ONLY   DATA_FAR IBCC_FAR  0x140800 TO 0x140BFF;
+      EEPROM_15     = READ_ONLY   DATA_FAR IBCC_FAR  0x150800 TO 0x150BFF;
+      EEPROM_16     = READ_ONLY   DATA_FAR IBCC_FAR  0x160800 TO 0x160BFF;
+      EEPROM_17     = READ_ONLY   DATA_FAR IBCC_FAR  0x170800 TO 0x170BFF;
+      EEPROM_18     = READ_ONLY   DATA_FAR IBCC_FAR  0x180800 TO 0x180BFF;
+      EEPROM_19     = READ_ONLY   DATA_FAR IBCC_FAR  0x190800 TO 0x190BFF;
+      EEPROM_1A     = READ_ONLY   DATA_FAR IBCC_FAR  0x1A0800 TO 0x1A0BFF;
+      EEPROM_1B     = READ_ONLY   DATA_FAR IBCC_FAR  0x1B0800 TO 0x1B0BFF;
+      EEPROM_1C     = READ_ONLY   DATA_FAR IBCC_FAR  0x1C0800 TO 0x1C0BFF;
+      EEPROM_1D     = READ_ONLY   DATA_FAR IBCC_FAR  0x1D0800 TO 0x1D0BFF;
+      EEPROM_1E     = READ_ONLY   DATA_FAR IBCC_FAR  0x1E0800 TO 0x1E0BFF;
+      EEPROM_1F     = READ_ONLY   DATA_FAR IBCC_FAR  0x1F0800 TO 0x1F0BFF;
+      EEPROM_FC     = READ_ONLY   DATA_FAR IBCC_FAR  0xFC0800 TO 0xFC0BFF;
+      EEPROM_FD     = READ_ONLY   DATA_FAR IBCC_FAR  0xFD0800 TO 0xFD0BFF;
+      EEPROM_FE     = READ_ONLY   DATA_FAR IBCC_FAR  0xFE0800 TO 0xFE0BFF;
+/*    EEPROM_FF     = READ_ONLY                      0xFF0800 TO 0xFF0BFF; intentionally not defined: equivalent to EEPROM */
+
+/* paged RAM:                                          0x1000 TO   0x1FFF; addressed through RPAGE */
+      RAM_F0        = READ_WRITE  DATA_FAR           0xF01000 TO 0xF01FFF;
+      RAM_F1        = READ_WRITE  DATA_FAR           0xF11000 TO 0xF11FFF;
+      RAM_F2        = READ_WRITE  DATA_FAR           0xF21000 TO 0xF21FFF;
+      RAM_F3        = READ_WRITE  DATA_FAR           0xF31000 TO 0xF31FFF;
+      RAM_F4        = READ_WRITE  DATA_FAR           0xF41000 TO 0xF41FFF;
+      RAM_F5        = READ_WRITE  DATA_FAR           0xF51000 TO 0xF51FFF;
+      RAM_F6        = READ_WRITE  DATA_FAR           0xF61000 TO 0xF61FFF;
+      RAM_F7        = READ_WRITE  DATA_FAR           0xF71000 TO 0xF71FFF;
+      RAM_F8        = READ_WRITE  DATA_FAR           0xF81000 TO 0xF81FFF;
+      RAM_F9        = READ_WRITE  DATA_FAR           0xF91000 TO 0xF91FFF;
+      RAM_FA        = READ_WRITE  DATA_FAR           0xFA1000 TO 0xFA1FFF;
+      // RAM_FB        = READ_WRITE  DATA_FAR           0xFB1000 TO 0xFB1FFF;
+      RAM_STACK_0   = NO_INIT     DATA_FAR           0xFB1000 TO 0xFB1FFF ALIGN 8[1:1];
+      // RAM_STACK_1   = NO_INIT     DATA_FAR           0xFC1000 TO 0xFC13FF ALIGN 8[1:1];
+      RAM_XGATE_0   = READ_WRITE  DATA_FAR           0xFC1000 TO 0xFC1FFF ALIGN 2[1:1];
+      RAM_XGATE_1   = READ_WRITE  DATA_FAR           0xFD1000 TO 0xFD1FFF ALIGN 2[1:1];
+/*    RAM_FE        = READ_WRITE                     0xFE1000 TO 0xFE1FFF; intentionally not defined: equivalent to RAM: 0x2000..0x2FFF */
+/*    RAM_FF        = READ_WRITE                     0xFF1000 TO 0xFF1FFF; intentionally not defined: equivalent to RAM: 0x3000..0x3FFF */
+
+/* paged FLASH:                                        0x8000 TO   0xBFFF; addressed through PPAGE */
+      PAGE_F0       = READ_ONLY   DATA_FAR IBCC_FAR  0xF08000 TO 0xF0BFFF;
+      PAGE_F1       = READ_ONLY   DATA_FAR IBCC_FAR  0xF18000 TO 0xF1BFFF;
+      PAGE_F2       = READ_ONLY   DATA_FAR IBCC_FAR  0xF28000 TO 0xF2BFFF;
+      PAGE_F3       = READ_ONLY   DATA_FAR IBCC_FAR  0xF38000 TO 0xF3BFFF;
+      PAGE_F4       = READ_ONLY   DATA_FAR IBCC_FAR  0xF48000 TO 0xF4BFFF;
+      PAGE_F5       = READ_ONLY   DATA_FAR IBCC_FAR  0xF58000 TO 0xF5BFFF;
+      PAGE_F6       = READ_ONLY   DATA_FAR IBCC_FAR  0xF68000 TO 0xF6BFFF;
+      PAGE_F7       = READ_ONLY   DATA_FAR IBCC_FAR  0xF78000 TO 0xF7BFFF;
+
+      PAGE_F8       = READ_ONLY   DATA_FAR IBCC_FAR  0xF88000 TO 0xF8BFFF;
+      PAGE_F9       = READ_ONLY   DATA_FAR IBCC_FAR  0xF98000 TO 0xF9BFFF;
+      PAGE_FA       = READ_ONLY   DATA_FAR IBCC_FAR  0xFA8000 TO 0xFABFFF;
+      PAGE_FB       = READ_ONLY   DATA_FAR IBCC_FAR  0xFB8000 TO 0xFBBFFF;
+      PAGE_FC       = READ_ONLY   DATA_FAR IBCC_FAR  0xFC8000 TO 0xFCBFFF;
+/*    PAGE_FD       = READ_ONLY                      0xFD8000 TO 0xFDBFFF; intentionally not defined: equivalent to ROM_4000 */
+      PAGE_FE       = READ_ONLY   DATA_FAR IBCC_FAR  0xFE8000 TO 0xFEBFFF;
+/*    PAGE_FF       = READ_ONLY                      0xFF8000 TO 0xFFBFFF; intentionally not defined: equivalent to ROM_C000 */
+
+
+END
+
+PLACEMENT /* here all predefined and user segments are placed into the SEGMENTS defined above. */
+
+      BOOTLOADER,
+      BOOTLOADER_CONST, INTO  ROM_4000, ROM_C000;
+      BOOTVECTORS,      INTO  BOOT_VECTOR;
+
+      STARTUP,
+      _PRESTART,              /* Used in HIWARE format: jump to _Startup at the code start */
+                              /* in case you want to use ROM_4000 here as well, make sure
+                                 that all files (incl. library files) are compiled with the
+                                 option: -OnB=b */
+      STRINGS,                /* string literals */
+      ROM_VAR,                /* constant variables */
+      DEFAULT_ROM,
+      PAGED_VERSION,
+      ASM_CODE,
+      COPY,                   /* copy down information: how to initialize variables */
+                        INTO  PAGE_F0, PAGE_F1, PAGE_F2, PAGE_F3, PAGE_F4, PAGE_F5, PAGE_F6, PAGE_F7,
+                              PAGE_F8, PAGE_F9, PAGE_FA, PAGE_FB, PAGE_FC, PAGE_FE;
+
+      IRQ_BRIDGE,
+      NON_BANKED,             /* runtime routines which must not be banked */
+      RAM_CODE,
+
+                        INTO  RAM_FOR_CODE;
+      SSTACK,                 /* allocate stack first to avoid overwriting variables on overflow */
+      DEFAULT_RAM             /* all variables, the default RAM location */
+                        INTO  RAM_FOR_DATA;
+
+      FBL_TAG,
+      FBL_DRIVER,
+                        INTO RAM_FOR_FBL;
+
+      PAGED_RAM,
+                        INTO RAM_F0, RAM_F1, RAM_F2, RAM_F3, RAM_F4, RAM_F5, RAM_F6, RAM_F7,
+                             RAM_F8, RAM_F9, RAM_FA;
+
+      TASK_STACK,
+                        INTO RAM_STACK_0/*, RAM_STACK_1*/;
+
+
+      XGATE_VECTORS,          /* XGATE vector table is allocated in FLASH */
+      XGATE_STRING,           /* XGATE string literals */
+      XGATE_CONST,            /* XGATE constants */
+      XGATE_CODE,             /* XGATE functions */
+      XGATE_DATA,             /* data that are accessed by XGATE only */
+      XGATE_STACK,
+                        INTO  RAM_XGATE_0, RAM_XGATE_1;
+
+      EEPROM_DATA       INTO  EEE1_RAM;
+
+END
+
+ENTRIES
+  IrqBridge
+  BootVectors
+  AppInfoTag
+END
+
+/* size of the stack (will be allocated in DEFAULT_RAM) */
+STACKSIZE 0x280

@@ -1,0 +1,226 @@
+#include "xgate.h"
+#include "Cpu.h"
+#include "PwmCapture_Lcfg.h"
+
+/*
+<%- JSON.stringify(mdata, null, '  ') %>
+*/
+
+<%
+if (mdata.hasOwnProperty('funcIncude')) {
+    for(var ch of mdata['funcIncude']) {
+%>
+#include "<%- ch %>"
+<%
+    }
+
+}%>
+
+
+// 在电路上，PWM的输入板级端子与MCU管脚都有反向电路。
+// 上述定义中PwmCapture_Cfg.h中定义的都是板级的信号。
+// PwmCapture.c PwmCapture.h中的定义的都是MCU管脚信号的方向，
+
+<%
+
+function channelEnabled(ch) {
+    return mdata.hasOwnProperty(ch) && mdata[ch].enable
+}
+
+function getTriggerEdge(ch) {
+    var edge = 'PWM_TRIGGER_HCS12_NONE';
+    if (channelEnabled(ch)) {
+        if (mdata[ch].risingFunc) {
+            edge = edge + ' | PWM_TRIGGER_HCS12_RAISING';
+        }
+
+        if (mdata[ch].fallingFunc) {
+            edge = edge + ' | PWM_TRIGGER_HCS12_FALLING';
+        }
+    }
+    return edge;
+}
+
+const handleNone = 0;
+const handleRising = 1;
+const handleFalling = 2;
+const handleAll = handleRising + handleFalling;
+
+function getFunctionHandleType(ch) {
+    var handle = handleNone;
+    if (channelEnabled(ch)) {
+        if (mdata[ch].risingFunc) {
+            handle += handleRising;
+        }
+
+        if (mdata[ch].fallingFunc && mdata[ch].fallingFunc != mdata[ch].risingFunc) {
+            handle += handleFalling;
+        }
+    }
+
+    return handle;
+}
+
+%>
+
+
+
+
+#pragma push
+#pragma DATA_SEG __GPAGE_SEG XGATE_DATA
+#pragma CONST_SEG __GPAGE_SEG XGATE_CONST
+
+const uint8 PwmCapture_ChannelNum = PWM_CAPTURE_CHANNEL_NUM;
+
+PwmCapture_DataType PwmCapture_DataList[PWM_CAPTURE_CHANNEL_NUM] = {
+<% if (channelEnabled('CP')) { %>
+    {(uint16 * near) &ECT_TC1, (uint8)((uint8)1U << 1), 1U, <%- getTriggerEdge('CP') %>, 0U, 0UL, 0UL, 0UL, 0U, 0U}, /**< CP PWM channel */
+<% } %>
+<% if (channelEnabled('SIGIN1')) { %>
+    {(uint16 * near) &ECT_TC2, (uint8)((uint8)1U << 2), 1U, <%- getTriggerEdge('SIGIN1') %>, 0U, 0UL, 0UL, 0UL, 0U, 0U}, /**< SIGIN1 */
+<% } %>
+<% if (channelEnabled('SIGIN2')) { %>
+    {(uint16 * near) &ECT_TC3, (uint8)((uint8)1U << 3), 1U, <%- getTriggerEdge('SIGIN2') %>, 0U, 0UL, 0UL, 0UL, 0U, 0U}, /**< SIGIN2 */
+<% } %>
+};
+
+#pragma pop
+
+XGATE_ISR_PROTYPE(PwmXgate_EdgeIsr);
+
+<% for(var x of [{ch:'SIGIN1', irq:'IRQ_STANDARD_TIM_2'}, {ch:'SIGIN2', irq:'IRQ_STANDARD_TIM_3'}]) {
+    var handle = getFunctionHandleType(x.ch);  %>
+<% if (channelEnabled(x.ch)) {%>
+static void on<%- x.ch %>Edge(void) {
+    <% if (handle == handleRising) { %>
+    <%- mdata[x.ch].risingFunc %>(&PwmCapture_DataList[PWM_CAPTURE_<%- x.ch %>_CHANNEL]);
+    <% } %>
+    <% if (handle == handleFalling) { %>
+    <%- mdata[x.ch].fallingFunc %>(&PwmCapture_DataList[PWM_CAPTURE_<%- x.ch %>_CHANNEL]);
+    <% } %>
+    <% if (handle == handleAll) { %>
+    if (PwmCapture_IsTriggerRising(&PwmCapture_DataList[PWM_CAPTURE_<%- x.ch %>_CHANNEL])) {
+        <%- mdata[x.ch].risingFunc %>(&PwmCapture_DataList[PWM_CAPTURE_<%- x.ch %>_CHANNEL]);
+    } else {
+        <%- mdata[x.ch].fallingFunc %>(&PwmCapture_DataList[PWM_CAPTURE_<%- x.ch %>_CHANNEL]);
+    }
+    <% } %>
+    HCS12_ClearGIF(IRQ_LOGIC_NUM_TO_PYH(<%- x.irq %>));
+}
+<% } %>
+<% } %>
+
+
+void PwmCapture_Start(void) {
+    uint16 func;
+    uint16 dat;
+
+<% if (channelEnabled('CP')) {%>
+    (void)XGate_AddrGlobalToXGate(&func, HCS12_GetXGateIsrFunc(PwmXgate_EdgeIsr));
+    (void)XGate_AddrGlobalToXGate(&dat, &PwmCapture_DataList[PWM_CAPTURE_CP_CHANNEL]);
+    XGateIrq_InstallVector(IRQ_STANDARD_TIM_1, func, dat);
+    XGate_RouteInterrupt(IRQ_STANDARD_TIM_1, TRUE, 2U);
+    ECT_TIOS_IOS1 = 0U; // input capture
+    ECT_TCTL4_EDG1A = 1U; // capture on both edge
+    ECT_TCTL4_EDG1B = 1U;
+    ECT_TIE_C1I = 1U; // enable interrupt;
+<% } %>
+
+<% if (channelEnabled('SIGIN1')) {%>
+    (void)XGate_AddrGlobalToXGate(&dat, &PwmCapture_DataList[PWM_CAPTURE_SIGIN1_CHANNEL]);
+    XGateIrq_InstallVector(IRQ_STANDARD_TIM_2, func, dat);
+    HC12XIrq_InstallVector(IRQ_STANDARD_TIM_2, onSIGIN1Edge, 0U);
+    XGate_RouteInterrupt(IRQ_STANDARD_TIM_2, TRUE, 2U);
+    ECT_TIOS_IOS2 = 0U; // input capture
+    ECT_TCTL4_EDG2A = 1U; // capture on both edge
+    ECT_TCTL4_EDG2B = 1U;
+    ECT_TIE_C2I = 1U; // enable interrupt;
+<% } %>
+
+<% if (channelEnabled('SIGIN2')) {%>
+    (void)XGate_AddrGlobalToXGate(&dat, &PwmCapture_DataList[PWM_CAPTURE_SIGIN2_CHANNEL]);
+    XGateIrq_InstallVector(IRQ_STANDARD_TIM_3, func, dat);
+    HC12XIrq_InstallVector(IRQ_STANDARD_TIM_3, onSIGIN2Edge, 0U);
+    XGate_RouteInterrupt(IRQ_STANDARD_TIM_3, TRUE, 2U);
+    ECT_TIOS_IOS3 = 0U; // input capture
+    ECT_TCTL4_EDG3A = 1U; // capture on both edge
+    ECT_TCTL4_EDG3B = 1U;
+    ECT_TIE_C3I = 1U; // enable interrupt;
+<% } %>
+}
+
+
+<% if (channelEnabled('CP')) {%>
+uint16 CP_GetFrequence(void) {
+    uint32 f = PwmCapture_GetFrequence(&PwmCapture_DataList[PWM_CAPTURE_CP_CHANNEL]);
+    if (f > 65535UL) {
+        f = 65535UL;
+    }
+    return (uint16)f;
+}
+
+uint16 CP_GetDuty(void) {
+    uint16 duty = 0U;
+    boolean got;
+
+    do {
+        HCS12_SetSem(XGATE_PWM_SEM_CHL);
+    } while (!HCS12_IsSemSet(XGATE_PWM_SEM_CHL));
+
+    if (PwmCapture_DataList[PWM_CAPTURE_CP_CHANNEL].bitlevel) {
+        if (PwmCapture_DataList[PWM_CAPTURE_CP_CHANNEL].highLevelCounter >= PwmCapture_Clock) {
+            duty = 1000U;
+            got = TRUE;
+        } else {
+            got = FALSE;
+        }
+    } else {
+        if (PwmCapture_DataList[PWM_CAPTURE_CP_CHANNEL].lowLevelCounter >= PwmCapture_Clock) {
+            duty = 0U;
+            got = TRUE;
+        } else {
+            got = FALSE;
+        }
+    }
+
+    HCS12_ReleaseSem(XGATE_PWM_SEM_CHL);
+
+    if (!got) {
+        duty = PwmCapture_GetDuty(&PwmCapture_DataList[PWM_CAPTURE_CP_CHANNEL]);
+    }
+
+    return duty;
+}
+
+
+uint32 CP_GetLowTime(void) {
+    return PwmCapture_GetLowTime(&PwmCapture_DataList[PWM_CAPTURE_CP_CHANNEL]);
+}
+
+uint32 CP_GetHighTime(void) {
+    return PwmCapture_GetHighTime(&PwmCapture_DataList[PWM_CAPTURE_CP_CHANNEL]);
+}
+<% } %>
+
+
+#include <stdio.h>
+#include "shell.h"
+
+const char shell_summary_cppwm[] = "dump CP frequence and duty";
+const char shell_help_cppwm[] = "\
+\n\
+    dump CP frequence and duty.\n\
+";
+
+int shell_func_cppwm(int argc, const char *const *argv);
+
+int shell_func_cppwm(int argc, const char *const *argv) {
+    int ret;
+    if (argc == 1) {
+        (void)printf("%d,%d\n", (int)CP_GetFrequence(), (int)CP_GetDuty());
+        ret = 0;
+    } else {
+        ret = Shell_ArgsError(argv[0]);
+    }
+    return ret;
+}

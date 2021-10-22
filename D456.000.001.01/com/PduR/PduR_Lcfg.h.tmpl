@@ -1,0 +1,17 @@
+#ifndef PDUR_LCFG_H
+#define PDUR_LCFG_H
+
+#include "PduR.h"
+#include "PduR_Types.h"
+
+/*<%-JSON.stringify(data.uppers)%>*/
+<%for (var v of data.uppers) {%>
+#define PDUR_CFG_<%-v.toUpperCase()%>_PDUID_NUM   <%-data[v].txs.length%>U
+<%}
+for (var v of data.middles) {%>
+/*<%-JSON.stringify(data[v])%>*/
+#define PDUR_CFG_<%-v.toUpperCase()%>_TX_PDUID_NUM   <%-data[v].txs.length%>U
+#define PDUR_CFG_<%-v.toUpperCase()%>_RX_PDUID_NUM   <%-data[v].rxs.length%>U
+<%}%>
+
+#endif

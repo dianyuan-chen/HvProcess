@@ -1,0 +1,102 @@
+/*lint -e* -w0*/
+
+#include "rtwtypes.h"
+#include "zero_crossing_types.h"
+#include "Udan_SOC_types.h"
+
+/* Exported data definition */
+
+/* Const memory section */
+/* Definition for custom storage class: Const */
+
+const boolean SoxUseModel = <%- enableModelSOX ? "TRUE" : "FALSE" %>;
+const uint8_T DenominatorOfIntegratorFactor = 100U;
+const uint8_T SOC_CalcSohLKT = <%- enableCycleSOH ? 1 : 0 %>U;
+const uint8_T SOC_CapPerCycle = <%- CulumCapPerCycle %>U;
+const uint8_T SOC_CapTemp_HLimit = 200U;
+const uint8_T SOC_CapTemp_LLimit = 0U;
+const uint8_T SOC_DchgEndCalib = <%- enableOCVAtDischargeEnd ? 1 : 0 %>U;
+const uint8_T SOC_EfficientHighLimit = 250U;
+const uint8_T SOC_EfficientLowLimit = 40U;
+const int32_T SOC_EmptyAus = 0;
+const uint8_T SOC_HighRealSoc = <%- realSOCUpperLimit %>U;
+const uint8_T SOC_LowRealSoc = <%- realSOCLowerLimit %>U;
+const uint32_T SOC_NominalCap_AmS = <%- totalCap * 1000 * 3600 %>UL;
+const uint8_T SOC_OCVTemp_HLimit = <%- ocvTempHighLimit + 51 %>U;
+const uint8_T SOC_OCVTemp_LLimit = <%- ocvTempLowLimit + 49 %>U;
+const uint16_T SOC_SOCResolution = 10000U;
+const uint16_T SOC_SOHResolution = 1000U;
+const uint8_T SOC_SohCalcHighLimit = 60U;
+const uint8_T SOC_SohCalcLowLimit = 10U;
+const uint8_T SOC_SohCalcMidLimit = 30U;
+const uint16_T SOC_NominalVol = <%- totalvol*10%>U;
+const uint8_T SOC_ShortCalibDSoc = <%- enableSOCJumpShortTimeOCV ? 1 : 0 %>U;
+const uint16_T SOC_DSOCJumpMax = <%- dSOCJumpMax * 100 %>U;
+const uint8_T SOHCalibCycle = 10U;
+const uint8_T SOC_CalcSOHTempLimit = 70U;
+const uint8_T SOC_EnableOcv = <%- enableSocOcv ? 1 : 0 %>U;
+const uint8_T SOC_DiffVoltMin = <%- ocvMinDiffVolt%>U;
+const uint16_T SOC_TempCap_CapBuffer[18] = {
+<%
+for (var v of tToCAPTableCapListFull) {
+%> <%- (v * 1000 / totalCap).toFixed() %>U, <%
+}
+%>
+} ;
+
+const uint8_T SOC_TempCap_TempBuffer[18] = {
+<%
+for (var x of tToCAPTableTListFull) {
+%> <%- 50 + x %>U, <%
+}
+%>
+};
+
+/* Const memory section */
+/* Definition for custom storage class: Const */
+const uint16_T SOC_LKTSohCycles[163] = {
+<%
+for (var v of cycleToSOHTableCycleListFull) {
+%> <%- v %>U, <%
+}
+%>
+} ;
+
+const uint16_T SOC_LKTSohTable[163] = {
+<%
+for (var v of cycleToSOHTableSOHListFull) {
+%> <%- (v * 10).toFixed() %>U, <%
+}
+%>
+} ;
+
+const uint8_T SOC_SohCalcCapPercent = 8U;
+const uint16_T SocOcvCalib_SocBuffer1[21] = {
+<%
+for (var v of ocvTableSOCIndexListFull) {
+%> <%- (v * 100).toFixed() %>U, <%
+}
+%>
+} ;
+
+const uint8_T SocOcvCalib_TempBuffer[18] = {
+<%
+for (var v of ocvTableTIndexListFull) {
+%> <%- v + 50 %>U, <%
+}
+%>
+} ;
+
+const uint16_T SocOcvCalib_VoltageBuffer1[378] = {
+<%
+for (var v of ocvTableListFull) {
+%> <%- v.toFixed() %>U, <%
+}
+%>
+} ;
+
+/*
+ * File trailer for generated code.
+ *
+ * [EOF]
+ */

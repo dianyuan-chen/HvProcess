@@ -1,0 +1,20 @@
+/**
+ * \addtogroup RelayM
+ * \{
+ */
+#ifndef RELAYM_LCFG_H_
+#define RELAYM_LCFG_H_
+
+#define RELAYM_FN_NUM   <%- relays.length %>U
+
+<%
+var i = 0;
+for (var relay of relays) {%>
+/** <%- JSON.stringify(relay) %> */
+#define <%- relay.def %> <%- i %>U
+<%
+    i++;
+}%>
+#endif
+
+/** \} */

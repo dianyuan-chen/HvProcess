@@ -1,0 +1,17 @@
+{
+  "name": "appoloconfig",
+  "version": "1.0.0",
+  "description": "",
+  "main": "appoloconfig.js",
+  "scripts": {
+    "start": "node appoloconfig.js"
+  },
+  "author": "",
+  "license": "ISC",
+
+  "dependencies": {
+    "ejs": "*",
+    "mkdir-recursive": "*",
+    "commander": "*"
+  }
+}

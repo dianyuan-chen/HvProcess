@@ -1,0 +1,21 @@
+#ifndef _CANIF_LCFG_H_
+#define _CANIF_LCFG_H_
+
+#include "CanIf.h"
+
+<%
+for (var v of rxsduids) {%>
+#define <%-v.name%>  <%-v.define%>U<%
+}%>
+
+<%
+var i = 0;
+for (var v of txsduids) {%>
+#define <%-v.name%>  <%-i%>U<%
+    i++;
+}%>
+
+#define CANIF_CFG_TOTAL_RXPDUID        <%-rxsduids.length%>U
+#define CANIF_CFG_TOTAL_TXPDUID        <%-txsduids.length%>U
+
+#endif

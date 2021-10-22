@@ -1,0 +1,167 @@
+#include "SystemConnection.h"
+#include "SystemConnection_Lcfg.h"
+#include "CellDataM.h"
+
+/*lint -save*/
+/*lint -e793*/
+
+#pragma push
+#pragma DATA_SEG __GPAGE_SEG XGATE_DATA
+#pragma CONST_SEG __GPAGE_SEG XGATE_CONST
+
+/**
+ * \brief 均衡状态缓存长度定义
+ */
+#define BALANCEM_BALANCE_STATUS_BUFFER_SIZE ((SYSTEM_BATTERY_CELL_NUM + 7U) / 8U)
+
+const SystemConnection_ConfigInfoType SystemConnection_ConfigInfo = {
+    SYSTEM_BMU_NUM, /**<  App_SlaveIdType SlaveNum; 从机个数 */
+    <%- BcuSupportDtu %>U, /**< boolean DtuSupport; 是否支持内置DTU */
+    <%- BcuIsAllInOne %>U, /**< boolean BcuIsAllInOne; 是否为一体机 */
+    DEVICE_TYPE_<%-Bcu-%>, /**< DeviceInfo_DeviceTypeType BcuType; 主机类型 */
+    SYSTEM_HEAT_TEMPERATURE_SENSOR_EN, /**< heatTemperatureEnable: 加热温感使能 */
+    SYSTEM_POLE_TEMPERATURE_SENSOR_EN, /**< poleTemperatureEnable: 极柱温感使能 */
+    SYSTEM_BATTERY_CELL_NUM, /**< voltageNum: 电池电压个数 */
+    SYSTEM_BATTERY_SAMPLE_BOARD_NUM, /**< voltageSampleBoardNum: 电压采集板个数 */
+    SYSTEM_TEMP_SAMPLE_BOARD_NUM, /**< temperatureSampleBoardNum: 温感采集板个数 */
+    SYSTEM_TEMP_CELL_NUM, /**< temperatureNum: 电池温感个数 */
+    SYSTEM_HEAT_TEMP_NUM, /**< heatTemperatureNum: 加热温感个数 */
+    SYSTEM_POLE_TEMP_NUM, /**< poleTemperatureNum: 极柱温感个数 */
+    BALANCEM_BALANCE_STATUS_BUFFER_SIZE, /**< balanceBuffSize: 均衡缓存长度 */
+    SYSTEM_SAMPLE_BOARD_NUM_ON_DAISY_CHAIN, /**< 菊花式链接的采集板个数 */
+};
+
+const DeviceInfo_DeviceTypeType SystemConnection_SlaveTypesTable[] = {
+    <%for (var v of Bmus){%>DEVICE_TYPE_<%-v%>,<%}%>
+};
+
+const uint16 CellDataM_BmuVoltageLogicIdMax[SYSTEM_BMU_NUM] = {
+    <% a = BmuBatt.LogicIdMax.map(x=>x.toString()+'U') %><%-
+    a%>
+};
+
+<% if (NeedDaisyChainBatConnInfo) {%>
+const uint16 CellDataM_CellsSetup[SYSTEM_SAMPLE_BOARD_NUM_ON_DAISY_CHAIN]={
+    <%for (var v of CellsSetup){%><%- Number('0b' + v) %>U,<%}%>
+};
+const uint8 CellDataM_TempsSetup[SYSTEM_SAMPLE_BOARD_NUM_ON_DAISY_CHAIN]={
+    <%for (var v of TempsSetup){%><%- Number('0b' + v) %>U,<%}%>
+};
+<% } %>
+
+const uint8 CellDataM_BmuBoardVoltageLogicIdMax[SYSTEM_BATTERY_SAMPLE_BOARD_NUM] ={
+    <%-BmuBatt.BoardLogicIdMax%>
+};
+
+const uint8 CellDataM_VoltageLogicIdToPhysicalIdMap[SYSTEM_BATTERY_CELL_NUM] = {
+    <%for (var v of BmuBatt.LogicToPhyIdMap) {%><%-v%><%}%>
+};
+
+const uint16 CellDataM_BmuTemperatureLogicIdMax[SYSTEM_BMU_NUM] = {
+    <% a = BmuCellTemp.LogicIdMax.map(x=>x.toString()+'U') %><%-
+    a%>
+};
+
+const uint8 CellDataM_BmuBoardTemperatureLogicIdMax[SYSTEM_TEMP_SAMPLE_BOARD_NUM] = {
+    <%-BmuCellTemp.BoardLogicIdMax%>
+};
+
+#if SYSTEM_TEMP_CELL_NUM != 0U
+const uint8 CellDataM_TemperatureLogicIdToPhysicalIdMap[SYSTEM_TEMP_CELL_NUM] = {
+    <%for (var v of BmuCellTemp.LogicToPhyIdMap) {%><%-v%><%}%>
+};
+#else
+const uint8 CellDataM_TemperatureLogicIdToPhysicalIdMap[1];
+#endif
+
+const uint16 CellDataM_BmuHeatTemperatureLogicIdMax[SYSTEM_BMU_NUM] = {
+    <% a = BmuHeatTemp.LogicIdMax.map(x=>x.toString()+'U') %><%-
+    a%>
+};
+
+const uint8 CellDataM_BmuBoardHeatTemperatureLogicIdMax[SYSTEM_TEMP_SAMPLE_BOARD_NUM] = {
+    <%-BmuHeatTemp.BoardLogicIdMax%>
+};
+
+#if SYSTEM_HEAT_TEMP_NUM != 0U
+const uint8 CellDataM_HeatTemperatureLogicIdToPhysicalIdMap[SYSTEM_HEAT_TEMP_NUM] = {
+    <%for (var v of BmuHeatTemp.LogicToPhyIdMap) {%><%-v%><%}%>
+};
+#else
+const uint8 CellDataM_HeatTemperatureLogicIdToPhysicalIdMap[1];
+#endif
+
+const uint16 CellDataM_BmuPoleTemperatureLogicIdMax[SYSTEM_BMU_NUM] = {
+    <% a = BmuPoleTemp.LogicIdMax.map(x=>x.toString()+'U') %><%-
+    a%>
+};
+
+const uint8 CellDataM_BmuBoardPoleTemperatureLogicIdMax[SYSTEM_TEMP_SAMPLE_BOARD_NUM] = {
+    <%-BmuPoleTemp.BoardLogicIdMax%>
+};
+
+#if SYSTEM_POLE_TEMP_NUM != 0U
+const uint8 CellDataM_PoleTemperatureLogicIdToPhysicalIdMap[SYSTEM_POLE_TEMP_NUM] = {
+    <%for (var v of BmuPoleTemp.LogicToPhyIdMap) {%><%-v%><%}%>
+};
+#else
+const uint8 CellDataM_PoleTemperatureLogicIdToPhysicalIdMap[1];
+#endif
+
+/*lint -restore*/
+
+/**
+ * \brief 电池数据管理逻辑单体电压缓存定义
+ */
+App_VoltageType CellDataM_LogicVoltageBuffer[SYSTEM_BATTERY_CELL_NUM];
+
+/**
+ * \brief 电池数据管理逻辑温度缓存定义
+ */
+#if SYSTEM_TEMP_CELL_NUM != 0U
+App_TemperatureType CellDataM_LogicTemperatureBuffer[SYSTEM_TEMP_CELL_NUM];
+#else
+App_TemperatureType CellDataM_LogicTemperatureBuffer[1];
+#endif
+
+/**
+ * \brief 电池数据管理逻辑加热温度缓存定义
+ */
+#if SYSTEM_HEAT_TEMP_NUM != 0U
+App_TemperatureType CellDataM_LogicHeatTemperatureBuffer[SYSTEM_HEAT_TEMP_NUM];
+#else
+App_TemperatureType CellDataM_LogicHeatTemperatureBuffer[1U];
+#endif
+
+/**
+ * \brief 电池数据管理逻辑加热温度缓存定义
+ */
+#if SYSTEM_POLE_TEMP_NUM != 0U
+App_TemperatureType CellDataM_LogicPoleTemperatureBuffer[SYSTEM_POLE_TEMP_NUM];
+#else
+App_TemperatureType CellDataM_LogicPoleTemperatureBuffer[1U];
+#endif
+
+const uint8 SystemConnection_SlaveSampleBoardNumTable[] = { <%- mdata.SlaveSampleBoardNum %>};
+
+#pragma pop
+
+const uint8 SystemConnection_SlaveCellNumTable[] = { <%- mdata.SlaveCellNum %>};
+const uint8 SystemConnection_SlaveTempNumTable[] = { <%- mdata.SlaveTempNum %>};
+
+/**
+ * \brief 实际从机类型缓存定义
+ */
+DeviceInfo_DeviceTypeType CellDataM_SlaveTypeBuffer[SYSTEM_BMU_NUM];
+
+/**
+ * \从机均衡状态缓存定义
+ */
+uint8 BalanceM_BalanceStatus[BALANCEM_BALANCE_STATUS_BUFFER_SIZE];
+uint8 BalanceM_BalanceCmdBits[BALANCEM_BALANCE_STATUS_BUFFER_SIZE];
+const uint8 BalanceM_BalanceBuffSize = (uint8)BALANCEM_BALANCE_STATUS_BUFFER_SIZE;
+
+
+DeviceInfo_DeviceInfoType DeviceInfo_RuntimeInfo[SYSTEM_BMU_NUM];
+
+uint8 InternalComm_TempTypeCfgCntBuff[SYSTEM_BMU_NUM];

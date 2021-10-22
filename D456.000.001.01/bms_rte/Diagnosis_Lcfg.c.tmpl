@@ -1,0 +1,110 @@
+#include "Diagnosis.h"
+#include "Statistic.h"
+#include "CurrentM.h"
+#include "RuntimeM.h"
+#include "Insu.h"
+#include "Soc.h"
+#include "SocCalib_Cbk.h"
+#include "RelayM.h"
+#include "InternalComm.h"
+#include "ChargeM.h"
+#include "DischargeM.h"
+#include "ChgSckTmpM.h"
+#include "UserStrategy.h"
+#include "TemperatureM.h"
+#include "ChargerComm.h"
+#include "VcuComm.h"
+#include "FullCharge.h"
+#include "PrechargeM.h"
+#include "InitialDiagM.h"
+#include "HWDiagnosis.h"
+#include "CellDataM.h"
+#include "EL.h"
+
+extern Diagnosis_LevelsStatusType Diagnosis_LevelsStatus[];
+
+/*lint -save*/
+/*lint -e778*/
+
+<%for (var cfg of infoconfig) {%>
+/* <%- cfg.name %> */<%
+    if (!cfg.events || cfg.events.length == 0) {%>
+#define Diagnosis_<%- cfg.itemDef %>DefaultEventConfig NULL
+<%
+        continue;
+    }
+%>
+static const Diagnosis_DefaultEventCbkItemType Diagnosis_<%- cfg.itemDef %>DefaultEventConfig[] = {<%
+    for (var event of cfg.events) {%>
+    {/* <%-JSON.stringify(event)%> */
+        <%- event.eventMask %>, /**< eventMask 关心的事件 */
+        0x<%- event.leveMask.toString(16) %>U, /**< levelMask 关心的级别 */
+        <%- event.action %>, /**< cbk 回调函数 */
+    },<%
+    }%>
+};
+<%
+}%>
+
+const Diagnosis_DiagInfoType Diagnosis_DiagInfoConfig[] = {<%
+var i = 0;
+for (var cfg of infoconfig) {%>
+    {/*<%- i %> <%- cfg.name %> */
+        <%-cfg.cycle%>U, /**< cycle: 更新周期 */
+        DIAGNOSIS_CONDITION_<%-cfg.conditionFlag%>_MASK, /**< conditionFlag: 诊断条件 */
+        0x<%-cfg.enableFlag.toString(16)%>U, /**< enableFlag: 诊断使能 */
+        DIAGNOSIS_TYPE_<%-cfg.diagnosisType%>_EXTREME, /**< diagnosisType: 诊断类型 */<%
+        if (cfg.isNoneCalibrate) {%>
+        &Diagnosis_LevelsStatus[(((uint8)DIAGNOSIS_ITEM_<%-cfg.itemDef%> - (uint8)DIAGNOSIS_ITEM_NONE_CALIBRATE_START) + (uint8)DIAGNOSIS_ITEM_CALIBRATE_STOP) + 1U], /**< status: 诊断状态 */<%
+        } else {%>
+        &Diagnosis_LevelsStatus[(uint8)DIAGNOSIS_ITEM_<%-cfg.itemDef%>], /**< status: 诊断状态 */<%
+        }%>
+        <%-cfg.getDataFunc%>, /**< getDataFunc: 诊断数据状态获取函数 */
+        <%-cfg.isvalidFunc%>, /**< DataIsvalidFunc: 数据是否有效函数指针 */
+        <%-cfg.levelParaGetFunc%>, /**< levelParaGetFunc: 报警参数获取函数,使用此函数后标定及配置参数将无效 */
+        <%- cfg.events? cfg.events.length:0 %>U, /* defaultEventCbkNum: 默认事件回调事件个数 */
+        Diagnosis_<%-cfg.itemDef%>DefaultEventConfig, /**< defaultEvent: 默认事件列表 */
+    },<%
+    i++;
+}%>
+};
+
+
+
+<%for (var cfg of infoconfig) {%>
+/* <%- cfg.name %> */<%
+    if (!cfg.startDiagnosis.events || cfg.startDiagnosis.events.length == 0) {%>
+#define Diagnosis_StartDiag_<%- cfg.itemDef %>DefaultEventConfig NULL
+<%
+        continue;
+    }
+%>
+static const Diagnosis_DefaultEventCbkItemType Diagnosis_StartDiag_<%- cfg.itemDef %>DefaultEventConfig[] = {<%
+    var i = 0;
+    for (var event of cfg.startDiagnosis.events) {%>
+    {/* <%-JSON.stringify(event)%> */
+        <%- event.eventMask %>, /**< eventMask 关心的事件 */
+        0x<%- event.leveMask.toString(16) %>U, /**< levelMask 关心的级别 */
+        <%- event.action %>, /**< cbk 回调函数 */
+    },<%
+        i++;
+    }%>
+};
+<%
+}%>
+
+
+const Diagnosis_StartDiagInfoType Diagnosis_StartDiagInfo[] = {<%
+for (var cfg of infoconfig) {%>
+    {/* <%-cfg.name%> */
+        <%-cfg.startDiagnosis.timeout%>UL, /**< timeout: 自检超时时间 */
+        0x<%-cfg.startDiagnosis.enableFlag.toString(16)%>U, /**< enableFlag: 诊断使能 */
+        <%- cfg.startDiagnosis.valueReady %>, /**< IsAllowFunc: 自检允许回调函数 */
+        <%- cfg.startDiagnosis.events ? cfg.startDiagnosis.events.length:0 %>U, /* defaultEventCbkNum: 默认事件回调事件个数 */
+        Diagnosis_StartDiag_<%-cfg.itemDef%>DefaultEventConfig, /**< defaultEvent: 默认事件列表 */
+    },<%
+}
+%>
+};
+
+/*lint -restore*/

@@ -1,0 +1,43 @@
+#ifndef PWM_CAPTURE_LCFG_H
+#define PWM_CAPTURE_LCFG_H
+
+#include "PwmCapture.h"
+
+
+/*
+<%- JSON.stringify(mdata, null, '  ') %>
+*/
+
+<%
+var i = 0;
+for(var ch of ['CP', 'SIGIN1', 'SIGIN2']) {
+    if (mdata.hasOwnProperty(ch) && mdata[ch].enable) {
+%>
+
+#define PWM_CAPTURE_<%-ch%>_CHANNEL    <%- i %>U
+
+<%
+        i = i + 1;
+    }
+}
+
+%>
+
+#define PWM_CAPTURE_CHANNEL_NUM        <%- i %>U
+
+#if PWM_CAPTURE_CHANNEL_NUM > 0U
+
+#pragma push
+#pragma DATA_SEG __GPAGE_SEG XGATE_DATA
+#pragma CONST_SEG __GPAGE_SEG XGATE_CONST
+extern const uint8 PwmCapture_ChannelNum;
+extern PwmCapture_DataType PwmCapture_DataList[PWM_CAPTURE_CHANNEL_NUM];
+#pragma pop
+
+
+#endif
+
+void PwmCapture_Start(void);
+
+
+#endif

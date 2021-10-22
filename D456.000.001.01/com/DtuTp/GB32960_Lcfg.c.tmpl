@@ -1,0 +1,24 @@
+#include "GB32960.h"
+#include "GB32960_Cfg.h"
+
+const GB32960_ConfigType GB32960ConfigData = {
+    <%- dat.serverPort %>U,    // uint16 serverPort;
+    "<%- dat.serverAddr %>",    // const char *serverAddr;
+    GB32960_DCM_TX_PDUID,    // PduIdType tpTxPduId;
+    GB32960_DCM_RX_PDUID,    // PduIdType tpRxPduId;
+    GB32960_NOTIFY_OTA_REQUEST,    // void (*notifyOtaRequest)(void);
+    GB32960_NOTIFY_DISCONNECTED,    // void (*notifyDisconnected)(void);
+    GB32960_NOTIFY_CONNECTED,    // void (*notifyConnected)(void);
+    GB32960_GET_CCID,    // void (*getCCID)(char *ccid, uint8 len);
+    GB32960_TCP_CONNECT,    // Std_ReturnType (*tcpConnect)(const char *host, uint16 port);
+    GB32960_TCP_TRANSMIT,    // Std_ReturnType (*tcpTransmit)(uint16 length, uint16 (*)(uint8 *, uint16), void (*)(NotifResultType));
+    GB32960_TCP_DISCONNECT,    // Std_ReturnType (*tcpDisconnect)(void);
+    <%- dat.rtMsgInterval %>UL,    // uint32 rtMessageInterval;
+};
+
+
+<% if (dat.hasOwnProperty("apn") && dat.apn != "") {%>
+const char *const DtuM35_Apn = "<%- dat.apn %>";
+<% } else { %>
+const char *const DtuM35_Apn = NULL;
+<% } %>

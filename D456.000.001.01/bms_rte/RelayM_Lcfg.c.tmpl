@@ -1,0 +1,50 @@
+#include "RelayM.h"
+#include "RelayM_Lcfg.h"
+#include "Hv.h" /*lint !e537*/
+
+const RelayM_FunctionType RelayMFnNum = RELAYM_FN_NUM;
+
+const RelayM_CommonConfigType RelayMCommonConfigData = {
+    50UL, /**< MinTimeSapce: 继电器最小闭合间隔 */
+};
+
+<%var relays_get_instance_vol_func = []%>
+<%
+for (var relay of relays) {
+    if (relay.hvUserFunction) { %>
+extern sint16 <%- relay.hv %>(void);
+    <% } else if ('HV_CHANNEL_NONE' != relay.hv && !relays_get_instance_vol_func.includes(relay.hv)) {
+        relays_get_instance_vol_func.push(relay.hv)
+    %>
+static sint16 relay_<%- relay.hv %>_get_instance_vol(void) {
+    return HV_GetInstantVoltage(<%- relay.hv %>);
+}
+    <%}
+}%>
+
+#define relay_HV_CHANNEL_NONE_get_instance_vol NULL
+
+const RelayM_ConfigType RelayMConfigData[RELAYM_FN_NUM] = {<%
+for (var relay of relays) {%>
+    {
+        /* <%- JSON.stringify(relay) %> */
+        "<%- relay.name %>", /**<继电器名称*/
+        <%- relay.model.onDelay %>U, /**< 闭合机械延时 */
+        <%- relay.model.offDelay %>U, /**< 断开机械延时 */
+        <%- relay.model.resistor %>, /**< 线圈电阻 */
+        <%- relay.hlss %>, /**< 驱动的高边开关通道 */
+        <%- relay.isSafeToOff %>, /**< 判断是否可以安全切断 */
+        <%- relay.hvUserFunction ? relay.hv : "relay_" + relay.hv + "_get_instance_vol" %>,  /**< 获取后端电压的用户函数 */
+        <%- relay.checkInterval %>U, /**< 开路或黏连检测高压检测周期, ms */
+        <%- relay.isPositive ? "RELAYM_RELAY_ON_POS" : "RELAYM_RELAY_ON_NEG" %>, /**< 继电器所在位置, RELAYM_RELAY_ON_POS RELAYM_RELAY_ON_NEG */
+        <%- relay.continueDecPercent %>U, /**< 连续下降(上升)百分比 */
+        <%- relay.totalDecPercent %>U, /**< 直接百分比 */
+        <%- relay.checkTimeout %>U, /**< 开路或黏连检测超时时间 */
+        <%- relay.auxContactDio %>, /**< 辅助触点IO */
+        <%- relay.ioLevelOfAuxContactWhenOn %>, /**< 闭合是辅助触点的状态 */
+    },
+    <%
+}%>
+};
+
+RelayM_InnerDataType RelayMInnerData[RELAYM_FN_NUM];

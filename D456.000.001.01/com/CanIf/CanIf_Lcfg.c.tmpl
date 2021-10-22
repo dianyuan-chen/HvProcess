@@ -1,0 +1,153 @@
+#include "CanIf_Lcfg.h"
+
+<%
+var cbks = txsduids.reduce((xx, d) => {
+    if (xx.indexOf(d.from) < 0) xx.push(d.from);
+    return xx;
+}, []);
+
+cbks = rxsduids.reduce((xx, d) => {
+    if (xx.indexOf(d.to) < 0) xx.push(d.to);
+    return xx;
+}, cbks);
+
+for (var cbk of cbks) {
+%>#include "<%-cbk%>_Cbk.h"
+<%}%>
+
+#if (STD_ON == CANIF_RX_PDU_RANGE_CANID)
+#define CANIF_CFG_RANGE_CANID_RXPDUID   (0U)
+#endif
+#define CANIF_CFG_TOTAL_HRH                 (8U)
+
+#if (STD_ON == CANIF_PUBLIC_TX_BUFFERING)
+boollean/*CANIF_PRIVATE_DATA*/
+CanIfTxBufferPDUFillflag[CANIF_CFG_TOTAL_TXPDUID];
+
+uint8/*CANIF_PRIVATE_DATA*/
+CanIfTxBufferSdu[CANIF_CFG_TOTAL_TXPDUID][CAN_DATA_DLC];
+
+Can_PduType/*CANIF_PRIVATE_DATA*/
+CanIfTxBufferPdu[CANIF_CFG_TOTAL_TXPDUID];
+#endif
+
+#if (STD_ON == CANIF_PUBLIC_SETDYNAMICTXID_API)
+Can_IdType/*CANIF_PRIVATE_DATA*/
+CanIfTxPduCanIdForDynamic[CANIF_CFG_TOTAL_TXPDUID];
+#endif
+
+#if(STD_ON == CANIF_PUBLIC_READTXPDU_NOTIFY_STATUS_API)
+CanIf_NotifStatusType/*CANIF_PRIVATE_DATA*/
+CanIfTxNotifStatus[CANIF_CFG_TOTAL_TXPDUID];
+#endif
+
+#if(STD_ON == CANIF_PUBLIC_READRXPDU_NOTIFY_STATUS_API)
+CanIf_NotifStatusType/*CANIF_PRIVATE_DATA*/
+CanIfRxNotifStatus[CANIF_CFG_TOTAL_RXPDUID];
+#endif
+
+#if (STD_ON == CANIF_PUBLIC_READRXPDU_DATA_API)
+uint8/*CANIF_PRIVATE_DATA*/
+CanIfRxBufferSduData[CANIF_CFG_TOTAL_RXPDUID][CAN_DATA_DLC];
+PduLengthType/*CANIF_PRIVATE_DATA*/
+CanIfRxBufferSduLength[CANIF_CFG_TOTAL_RXPDUID];
+#endif
+
+const PduIdType/*CANIF_CONFIG_CONST*/ CanIfInitNumberOfCanRxPduIds = CANIF_CFG_TOTAL_RXPDUID;
+const PduIdType/*CANIF_CONFIG_CONST*/ CanIfInitNumberOfCanTxPduIds = CANIF_CFG_TOTAL_TXPDUID;
+const Can_HwHandleType/*CANIF_CONFIG_CONST*/ CanIfInitNumberofHrh = CANIF_CFG_TOTAL_HRH;
+
+const uint8 CanIfTotalRxPduId = CANIF_CFG_TOTAL_RXPDUID;
+const uint8 CanifTotalTxPduid = CANIF_CFG_TOTAL_TXPDUID;
+
+#if (STD_ON == CANIF_RX_PDU_RANGE_CANID)
+const CanIf_RxPduCanIdRangeType/*CANIF_CONFIG_CONST*/
+CanIfRxPduCanIdRangeConfig[CANIF_CFG_RANGE_CANID_RXPDUID] = {
+};
+#endif
+
+const CanIf_RxPduConfigType/*CANIF_CONFIG_CONST*/
+CanIfRxPduConfig[] = {
+<%
+var i = 0;
+for (var v of rxsduids) {
+%>  {
+#if (STD_ON == CANIF_UPPER_LAYER_HANDLE)
+        <%-v.name%>,
+#endif
+        0x<%-v.id.toString(16)%>U, /* CanId*/
+        <%-v.extended?"EXTENDED_CAN":"STANDARD_CAN"%>, /* CanIdType */
+        <%-v.hoh%>U, /* CanIfRxPduHrhIdRef */
+        8U, /* CanIfRxPduDlc */
+        <%-v.to%>_RxIndication, /* CanIfRxPduUserRxIndicationName */
+#if(STD_ON == CANIF_PUBLIC_READRXPDU_NOTIFY_STATUS_API)
+        FALSE, /* CanIfRxPduReadNotifyStatus */
+#endif
+#if(STD_ON == CANIF_PUBLIC_READRXPDU_DATA_API)
+        FALSE, /* CanIfRxPduReadData */
+#endif
+#if(STD_ON == CANIF_RX_PDU_RANGE_CANID)
+        NULL_PTR, /* CanIfRxPduRangePtr */
+#endif
+#if(CANIF_FILTER_TYPE_INDEX == CANIF_PRIVATE_SOFTWARE_FILTER_TYPE)
+        <%- Number.isInteger(v.next) ? v.next.toString() + 'U' : v.next %>, /* CanIfRxPduNextHrh */
+#endif
+    }, <%
+    i++;
+}
+%>
+};
+
+#if(CANIF_FILTER_TYPE_INDEX == CANIF_PRIVATE_SOFTWARE_FILTER_TYPE)
+const Can_HwHandleType/*CANIF_CONFIG_CONST*/
+CanIfHrhFirstRxPduID[CANIF_CFG_TOTAL_HRH] = {
+    <%-hrhFirstRxPduID%>
+};
+#endif
+
+#if(STD_ON == CANIF_HRH_RANGE_FILTER)
+const CanIf_HrhRangeCfgType/*CANIF_CONFIG_CONST*/
+CanIfHrhRangeCfg[CANIF_CFG_TOTAL_HRH] = {
+    /* not supported */
+};
+#endif
+
+
+const CanIf_TxPduConfigType/*CANIF_CONFIG_CONST*/
+CanIfTxPduConfig[] = {
+<%
+var i = 0;
+for (var v of txsduids) {
+%>  {
+    /* <%-i%>  <%-JSON.stringify(v)%>*/
+#if (STD_ON == CANIF_UPPER_LAYER_HANDLE)
+        <%-v.hasOwnProperty("define") ? v.define.toString() + 'U' : v.name%>,
+#endif
+        0x<%-v.id.toString(16)%>U, /* CanId*/
+        <%-v.extended?"EXTENDED_CAN":"STANDARD_CAN"%>, /* CanIdType */
+        <%-v.hoh%>U, /* CanIfTxPduHthIdRef */
+        8U, /* CanIfTxPduDlc */
+        <%-v.from%>_TxConfirmation, /* CanIfTxPduUserTxConfirmationUL */
+#if(STD_ON == CANIF_PUBLIC_SETDYNAMICTXID_API)
+        FALSE, /* CanIfTxPduType */
+#endif
+#if(STD_ON == CANIF_PUBLIC_READTXPDU_NOTIFY_STATUS_API)
+        FALSE, /* CanIfTxPduReadData */
+#endif
+    }, <%
+    i++;
+}%>
+};
+
+<%
+for (var v of rxsduids) {%>
+const PduIdType PduId_<%-v.name%> = <%-v.name%>;<%
+}%>
+
+<%
+var i = 0;
+for (var v of txsduids) {%>
+const PduIdType PduId_<%-v.name%> = <%-v.name%>;<%
+    i++;
+}%>
+

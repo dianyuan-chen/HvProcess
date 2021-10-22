@@ -1,0 +1,69 @@
+/**
+ * \file J1939Tp_Cfg.H
+ * \copyright UDAN Co.,Ltd. *
+ *
+ * \brief J1939Tp配置头文件.
+ *
+ * * \par 修订历史:
+ * | 版本号 | 修订日志 | 修改人 | 修订时间 |
+ * | :--- | :--- | :--- | :--- |
+ * | 0.1 | 初版本, 完成讨论部分的定义. | UD00004 | 20170224 |
+ */
+
+
+#ifndef J1939TP_LCFG_H
+#define J1939TP_LCFG_H
+
+#include "J1939Tp.h"
+
+
+/*
+上传业务传给J1939Tp_Transmit的PDUID,
+J1939接受到数据传给上层的PDUID;
+*/<%
+var i = 0;
+for (var v of rxsduids) {
+    if (v != "None") {%>
+#define J1939TP_NSDU_RX_<%-v.toUpperCase()%> <%-i%>U<%
+    }
+    i++;
+}
+
+i = 0;
+for (var v of txsduids) {
+    if (v != "None") {%>
+#define J1939TP_NSDU_TX_<%-v.toUpperCase()%> <%-i%>U<%
+    }
+    i++;
+}
+%>
+
+<%
+var rnum = 0;
+var tnum = 0;
+for (var v of channels) {
+    if (v.direction == "J1939TP_RX") {
+        rnum++;
+    }
+    if (v.direction == "J1939TP_TX") {
+        tnum++;
+    }
+}%>
+
+#define J1939TP_RX_PDU_COUNT         <%-rxpdus.length%>
+
+#include "J1939Tp_Internal.h"
+
+extern J1939Tp_Internal_ChannelInfoType   J1939InternalChannelInfos   [<%-channels.length%>];
+extern J1939Tp_Internal_TxChannelInfoType J1939InternalTxChannelInfos [<%-tnum%>];
+extern J1939Tp_Internal_RxChannelInfoType J1939InternalRxChannelInfos [<%-rnum%>];
+extern J1939Tp_Internal_PgInfoType        J1939InternalPgInfos        [<%-pgs.length%>];
+
+extern const uint8 J1939InternalChannelInfosSize;
+extern const uint8 J1939InternalTxChannelInfosSize;
+extern const uint8 J1939InternalRxChannelInfosSize;
+extern const uint8 J1939InternalPgInfosSize;
+extern const uint8 J1939InternalRxPduCount;
+
+
+#endif /*J1939TP_CFG_H*/

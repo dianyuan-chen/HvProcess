@@ -1,0 +1,6 @@
+#ifndef DATETIMEM_CFG_H
+#define DATETIMEM_CFG_H
+
+#define DATETIMEM_ENABLE_HWDIAGNOSIS STD_ON
+
+#endif

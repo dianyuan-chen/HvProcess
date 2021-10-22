@@ -1,0 +1,207 @@
+/**
+ * \file ChargeConnectM_LCfg.c
+ * \copyright UDAN Co.,Ltd. *
+ *
+ * \brief 充电连接管理链接配置文件.
+ *
+ * * \par 修订历史:
+ * | 版本号 | 修订日志 | 修改人 | 修订时间 |
+ * | :--- | :--- | :--- | :--- |
+ * | 0.1 | 初始版本, 完成讨论部分的定义. | UD00004 | 20161207 |
+ */
+
+
+
+#include "ChargeConnectM.h"
+#include "DigitalInput_Cfg.h"
+#include "ChargerComm.h"
+#include "EL.h"
+#include "RuntimeM.h"
+#include "ChargeCC_Cfg.h"
+#include "ExternCanComm.h"
+<% if (ac.relay == "RELAYM_FN_NONE" || dc.relay == "RELAYM_FN_NONE" || dc2.relay == "RELAYM_FN_NONE") {%>
+#include "RelayM_Cfg.h"
+<%}%>
+<% if (ac.relay != "RELAYM_FN_NONE" || dc.relay != "RELAYM_FN_NONE" || dc2.relay != "RELAYM_FN_NONE") {%>
+#include "RelayM_Lcfg.h"
+<%}%>
+/*
+
+<%-JSON.stringify(ac)%>
+<%-JSON.stringify(dc)%>
+<%-JSON.stringify(dc2)%>
+
+*/
+
+<% if (ac.userModeFunction[0] != "") {%>
+#include "<%- ac.userModeFunction[0] %>"
+<%}%>
+
+<% if (dc.userModeFunction[0] != "" && dc.userModeFunction[0] != ac.userModeFunction[0]) {%>
+#include "<%- dc.userModeFunction[0] %>"
+<%}%>
+
+<% if (dc2.userModeFunction[0] != "" && dc2.userModeFunction[0] != ac.userModeFunction[0] && dc2.userModeFunction[0] != dc.userModeFunction[0]) {%>
+#include "<%- dc2.userModeFunction[0] %>"
+<%}%>
+
+
+const ChargerComm_ConfigType ChargerComm_ConfigInfo = {
+    <%- protocol.ac %>, /**< AC_Protocol：交流充电协议 */
+    <%- protocol.dc %>, /**< DC_Protocol：直流充电协议 */
+    <%- ac.relay %>, /**< AC_RelayType: 交流充电继电器 */
+    <%- dc.relay %>, /**< DC_RelayType: 直流充电继电器 */
+    1U, /**< SendRetryNum: 发送重试次数 */
+    5U, /**< CellDeltaVoltMinForCV: 满足恒压时单体电芯最小压差设定值 */
+};
+
+const ExternCanComm_ConfigType ExternCanComm_ConfigInfo = {
+    <%- dc2.protocol %>, /**< Protocol：直流充电协议 */
+    <%- dc2.relay %>, /**< RelayType: 直流充电继电器 */
+    1U, /**< SendRetryNum: 发送重试次数 */
+    5U, /**< CellDeltaVoltMinForCV: 满足恒压时单体电芯最小压差设定值 */
+};
+
+const ChargeConnectM_ConfigType ChargeConnectM_ConfigInfo = {
+    TRUE, /**<  ConnectionIsDynamic: 充电连接是否动态更新 */
+    TRUE, /**< DoS2MonitorsEL: S2监控电子锁状态开关 */
+    TRUE, /**< DoS2MonitorCPEnable: S2监控CP使能开关 */
+    2000U, /**< S2OffDelayMin: S2最小断开延时 */
+    CHARGECONNECTM_PRIO_TYPE_AC_EQ_DC, /**< ConnectionPrio: 快慢充连接优先级 */
+    // AC_Para: 交流(慢充)
+    {
+        /* <%- JSON.stringify(ac) %> */
+        <%- ac.wakeup %>, /**< type: 充电唤醒信号*/
+        <%- ac.type %>, /**< type: 充电连接类型*/
+        {
+            <%- ac.dinType %>, /**< type: 数字输入类型（仅“充电连接类型”配置为CHARGECONNECTM_CONNECT_DIN时有效）*/
+            <%- ac.dinChannel %>, /**< channel: 数字输入通道（仅“充电连接类型”配置为CHARGECONNECTM_CONNECT_DIN时有效）*/
+            300U, /**< on_delay: 连接延时（仅“充电连接类型”配置为CHARGECONNECTM_CONNECT_DIN时有效）*/
+            300U, /**< off_delay: 断开延时（仅“充电连接类型”配置为CHARGECONNECTM_CONNECT_DIN时有效）*/
+        },
+        /**< 自定义充电连接建议连接释放增加延时确认 */
+        <%- ac.userModeFunction[1] %>, /**< FuncPtr: 自定义充电连接类型函数指针（仅“充电连接类型”配置为CHARGECONNECTM_CONNECT_SELF_DEFINE时有效） */
+    },
+    // DC_Para: 直流(快充)
+    {
+        /* <%-  JSON.stringify(dc) %> */
+        <%- dc.wakeup %>, /**< type: 充电唤醒信号*/
+        <%- dc.type %>, /**< type: 充电连接类型*/
+        {
+            <%- dc.dinType %>, /**< type: 数字输入类型（仅“充电连接类型”配置为CHARGECONNECTM_CONNECT_DIN时有效）*/
+            <%- dc.dinChannel %>, /**< channel: 数字输入通道（仅“充电连接类型”配置为CHARGECONNECTM_CONNECT_DIN时有效）*/
+            300U, /**< on_delay: 连接延时（仅“充电连接类型”配置为CHARGECONNECTM_CONNECT_DIN时有效）*/
+            300U, /**< off_delay: 断开延时（仅“充电连接类型”配置为CHARGECONNECTM_CONNECT_DIN时有效）*/
+        },
+        /**< 自定义充电连接建议连接释放增加延时确认 */
+        <%- dc.userModeFunction[1] %>, /**< FuncPtr: 自定义充电连接类型函数指针（仅“充电连接类型”配置为CHARGECONNECTM_CONNECT_SELF_DEFINE时有效） */
+    },
+    // DC2_Para: 直流(快充2)
+    {
+        /* <%-  JSON.stringify(dc2) %> */
+        <%- dc2.wakeup %>, /**< type: 充电唤醒信号*/
+        <%- dc2.type %>, /**< type: 充电连接类型*/
+        {
+            <%- dc2.dinType %>, /**< type: 数字输入类型（仅“充电连接类型”配置为CHARGECONNECTM_CONNECT_DIN时有效）*/
+            <%- dc2.dinChannel %>, /**< channel: 数字输入通道（仅“充电连接类型”配置为CHARGECONNECTM_CONNECT_DIN时有效）*/
+            300U, /**< on_delay: 连接延时（仅“充电连接类型”配置为CHARGECONNECTM_CONNECT_DIN时有效）*/
+            300U, /**< off_delay: 断开延时（仅“充电连接类型”配置为CHARGECONNECTM_CONNECT_DIN时有效）*/
+        },
+        /**< 自定义充电连接建议连接释放增加延时确认 */
+        <%- dc2.userModeFunction[1] %>, /**< FuncPtr: 自定义充电连接类型函数指针（仅“充电连接类型”配置为CHARGECONNECTM_CONNECT_SELF_DEFINE时有效） */
+    },
+    // CC CC2电阻计算参数
+    {
+        CC_CONFIG,
+        CC2_CONFIG,
+    },
+    // ResistancePara：国标充电连接电阻有效范围
+    {
+        140U, /**< CCRes100Max：CC(100欧)电阻最大值 */
+        25U, /**< CCRes100Min：CC(100欧)电阻最小值 */
+        360U, /**< CCRes220Max：CC(220欧)电阻最大值 */
+        140U, /**< CCRes220Min：CC(220欧)电阻最小值 */
+        940U, /**< CCRes680Max：CC(680欧)电阻最大值 */
+        360U, /**< CCRes680Min：CC(680欧)电阻最小值 */
+        1650U, /**< CCRes1500Max：CC(1500欧)电阻最大值 */
+        940U, /**< CCRes1500Min：CC(1500欧)电阻最小值 */
+        1450U, /**< CC2ResMax：CC2电阻最大值 */
+        550U, /**< CC2ResMin：CC2电阻最小值 */
+    },
+    // CpPara 国标CP参数
+    {
+        900U, /**< FreqMin: 频率最小值 */
+        1100U, /**< FreqMax: 频率最大值 */
+    },
+    // CurConnectPara 充电电流连接参数
+    {
+        CURRENT_S_100MA_FROM_A(2), /**< cur_min：最小充电连接电流 */
+        CURRENT_S_100MA_FROM_A(-2), /**< rel_cur_min：最小充电连接释放电流 */
+        2000UL, /**< connect_delay：连接延时 */
+        3000UL, /**< unconnect_delay：连接释放延时 */
+    },
+    // StartConnectPara 上电充电连接参数
+    {
+        200UL, /**< timeout: 上电充电连接超时时间 */
+    },
+};
+
+
+const EL_LockerConfigType ELLockerConfig[EL_LOCKER_NUM] = {
+    {/* <%- JSON.stringify(el) %> */
+        /*uint8 driveChipId;*/ <%- el.enable ? "0U" : "DRV8872_CHIPID_NONE" %>,
+        /*Dio_ChannelType LockFeedbackDio */ DIO_CHANNEL_<%- el.lockFeedback[0] %>,
+        /*Dio_ChannelType UnlockFeedbackDio */ DIO_CHANNEL_<%- el.unlockFeedback[0] %>,
+        /*Dio_LevelType FeedbackDiStateWhenLock*/ STD_<%- el.lockFeedback[1].toUpperCase() %>,
+        /*Dio_LevelType FeedbackDiStateWhenUnlock*/ STD_<%- el.unlockFeedback[1].toUpperCase() %>,
+        /*uint16 LockTimeDuration*/ <%- el.lockTime*1000 %>U,
+        /*uint16 UnlockTimeDuration*/ <%- el.unlockTime*1000 %>U,
+        /*uint16 OperationDuration*/ 100U,
+        /*uint8 ctlMaxNum*/ <%- el.ctlMax%>U,
+    }
+};
+
+
+#include <stdio.h>
+#include "Shell.h"
+
+const char shell_help_el[] = "\
+ [lock/unlock]\n\
+    [on/off] -- 锁止/解锁电子锁, 如果不给定参数, 查询状态.\n\
+";
+
+const char shell_summary_el[] =
+    "电子锁";
+
+int shell_func_el(int argc, const char * const*argv) { /*lint !e957*/
+    int ret;
+    if (argc == 1) {
+        EL_DiagnosisStatus status = EL_GetDiagnosisStatus(0U);
+        if (status == EL_Diagnosis_LockOK) {
+            (void)printf("locked\n");
+        } else if (status == EL_Diagnosis_UnlockOK) {
+            (void)printf("unlocked\n");
+        } else if (status == EL_Diagnosis_Disabled) {
+            (void)printf("disabled\n");
+        } else {
+            (void)printf("error:%d\n", status);
+        }
+        ret = 0;
+    } else if (argc == 2) {
+        if (strcmp(argv[1], "lock") == 0) {
+            (void)EL_LockSync(0U);
+            ret = 0;
+        } else if (strcmp(argv[1], "unlock") == 0) {
+            (void)EL_UnlockSync(0U);
+            ret = 0;
+        } else if (strcmp(argv[1], "disable") == 0) {
+            (void)EL_DisableSync(0U);
+            ret = 0;
+        } else {
+            ret = Shell_ArgsError(argv[0]);
+        }
+    } else {
+        ret = Shell_ArgsError(argv[0]);
+    }
+    return ret;
+}

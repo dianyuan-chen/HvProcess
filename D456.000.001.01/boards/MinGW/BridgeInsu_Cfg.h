@@ -1,0 +1,9 @@
+#ifndef BRIDGE_INSU_CFG_H
+#define BRIDGE_INSU_CFG_H
+
+
+#define BRIDGEINSU_DEV_ERROR_DETECT   STD_ON
+#define BRIDGEINSU_FILTER_NUM         20
+#define BRIDGEINSU_FILTER_DROP        3
+
+#endif

@@ -1,0 +1,24 @@
+NAMES
+END
+
+SEGMENTS /* here all RAM/ROM areas of the device are listed. Used in PLACEMENT below. All addresses are 'logical' */
+      RAM_FOR_FBL_RW   = READ_WRITE DATA_NEAR            0x39FF TO   0x39FF;
+      RAM_FOR_FBL      = READ_ONLY  DATA_NEAR            0x3A00 TO   0x3FFF;
+
+END
+
+PLACEMENT
+      FBL_TAG,
+      DEFAULT_ROM,
+      FBL_DRIVER,
+                        INTO RAM_FOR_FBL;
+      DEFAULT_RAM,
+                        INTO RAM_FOR_FBL_RW;
+
+END
+
+ENTRIES
+  _Startup
+END
+
+STACKSIZE 0x0

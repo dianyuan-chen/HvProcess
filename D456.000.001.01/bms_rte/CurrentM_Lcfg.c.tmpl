@@ -1,0 +1,121 @@
+#include "Shunt.h"
+
+const Shunt_SensorConfigType ShuntSensorConfig = {
+    <%- Math.round(shuntsensor.resistor * 10) %>U, /**< uint16 resistor; 0.1微欧姆 */
+    <%- shuntsensor.tempDrift %>U, /**< uint16 tempDrift; */
+    <%- shuntsensor.maxVol %>UL, /**< uint32 maxVol; */
+    <%- shuntsensor.isReverse ? "TRUE" : "FALSE" %>, /**< boolean isReverse */
+};
+
+
+#include <stdio.h>
+#include "Hall.h"<%
+if (hall1sensor.supplyVolAdj || hall2sensor.supplyVolAdj) {%>
+#include "HWDiagnosis.h"
+
+static uint16 getHallSupplyVoltage() {
+    return  HWDiagnosis_GetBoardVoltage(HWDIAGNOSIS_BCU_VOLT_HALL_5V);
+}<%
+}%>
+
+const Hall_ConfigType HallConfigData[HALL_CHANNEL_NUM] = {
+    {
+        <%- hall1sensor.offset %>, // sint16 offset;
+        <%- hall1sensor.mul %>, // sint16 mul;
+        <%- hall1sensor.div %>, // sint16 div;
+        <%- hall1sensor.filterNum %>U, // uint8 filterNum;
+        <%- hall1sensor.dropNum %>U, // uint8 dropNum;
+        <%- hall1sensor.voltMin %>U, // uint16 voltMin;
+        <%- hall1sensor.voltMax %>U, //uint16 voltMax;
+        <%- hall1sensor.supplyVolAdj ? "getHallSupplyVoltage" : "NULL" %>, // uint16 (*getSupplyVol)(void);
+        <%- hall1sensor.supplyVolAdj ? "TRUE" : "FALSE" %>, // boolean supplyVolAjd;
+        <%- hall1sensor.isReverse ? "TRUE" : "FALSE" %>, // boolean isReverse;
+    },
+    {
+        <%- hall2sensor.offset %>, // sint16 offset;
+        <%- hall2sensor.mul %>, // sint16 mul;
+        <%- hall2sensor.div %>, // sint16 div;
+        <%- hall2sensor.filterNum %>U, // uint8 filterNum;
+        <%- hall2sensor.dropNum %>U, // uint8 dropNum;
+        <%- hall2sensor.voltMin %>U, // uint16 voltMin;
+        <%- hall2sensor.voltMax %>U, //uint16 voltMax;
+        <%- hall2sensor.supplyVolAdj ? "getHallSupplyVoltage" : "NULL" %>, // uint16 (*getSupplyVol)(void);
+        <%- hall2sensor.supplyVolAdj ? "TRUE" : "FALSE" %>, // boolean supplyVolAjd;
+        <%- hall2sensor.isReverse ? "TRUE" : "FALSE" %>, // boolean isReverse;
+    },
+};
+
+
+#include "CurrentM.h"
+
+<% if (!usersensor1_enable) { %>
+Std_ReturnType UserCurrentSensor1_WaitCurrentCalibrated(Current_TimedCurrentType *current, uint16 timeout) {
+    (void)current;
+    (void)timeout;
+    return E_NOT_OK;
+}
+
+Current_CurrentType UserCurrentSensor1_GetCurrent(void) {
+    return (Current_CurrentType)CURRENT_INVALID_VALUE;
+}
+
+<% } %>
+
+<% if (!usersensor2_enable) { %>
+Std_ReturnType UserCurrentSensor2_WaitCurrentCalibrated(Current_TimedCurrentType *current, uint16 timeout) {
+    (void)current;
+    (void)timeout;
+    return E_NOT_OK;
+}
+
+Current_CurrentType UserCurrentSensor2_GetCurrent(void) {
+    return (Current_CurrentType)CURRENT_INVALID_VALUE;
+}
+
+<% } %>
+
+const CurrentM_ConfigType CurrentM_ConfigInfo = {
+    <%- currentmcfg.isDualRange ? "STD_ON" : "STD_OFF" %>, /**< hallIsDualRange: 2路HALL传感器是否为双量程传感器 */
+    <%- Math.round(currentmcfg.lowerHallMaxValue) %>, /**< LowHallCurrentMax: 小量程HALL最大电流值，超过此值启用大量程, 单位0.1A */
+    // main
+    {
+        <%- currentmcfg.main.enable ? "STD_ON" : "STD_OFF" %>, /**< enable: 是否开启该回路采集 */
+        CURRENTM_SAMPLE_CHANNEL_<%- currentmcfg.main.enable ? currentmcfg.main.channel : "INVALID"%>, /**< channel: 该采集回路使用的通道 */
+        <%- currentmcfg.main.redundancyEnable ? "STD_ON" : "STD_OFF" %>, /**< redundancyEnable: 该采集回路是否开启冗余采集 */
+        CURRENTM_SAMPLE_CHANNEL_<%- currentmcfg.main.redundancyEnable ? currentmcfg.main.redundancyChannel : "INVALID"%>, /**< redundancySample: 冗余采集使用的通道 */
+    },
+    // heater
+    {
+        <%- currentmcfg.heater.enable ? "STD_ON" : "STD_OFF" %>, /**< enable: 是否开启该回路采集 */
+        CURRENTM_SAMPLE_CHANNEL_<%- currentmcfg.heater.enable ? currentmcfg.heater.channel : "INVALID"%>, /**< channel: 该采集回路使用的通道 */
+        <%- currentmcfg.heater.redundancyEnable ? "STD_ON" : "STD_OFF" %>, /**< redundancyEnable: 该采集回路是否开启冗余采集 */
+        CURRENTM_SAMPLE_CHANNEL_<%- currentmcfg.heater.redundancyEnable ? currentmcfg.heater.redundancyChannel : "INVALID"%>, /**< redundancySample: 冗余采集使用的通道 */
+    },
+    // autoCalibLimit
+    {
+        <%- Math.round(currentmcfg.autoCalibLimit.hall1) %>, /**< HALL1 , 单位0.1A*/
+        <%- Math.round(currentmcfg.autoCalibLimit.hall2) %>, /**< HALL2 , 单位0.1A*/
+        <%- Math.round(currentmcfg.autoCalibLimit.shunt) %>, /**< SHUNT , 单位0.1A*/
+        100, /**< CURRENTM_SAMPLE_CHANNEL_USERDEF1 , 单位0.1A*/
+        100, /**< CURRENTM_SAMPLE_CHANNEL_USERDEF2 , 单位0.1A*/
+    },
+    //zeroFilter
+    {
+        <%- Math.round(currentmcfg.zeroFilter.hall1) %>, /**< HALL1 , 单位0.1A*/
+        <%- Math.round(currentmcfg.zeroFilter.hall2) %>, /**< HALL2 , 单位0.1A*/
+        <%- Math.round(currentmcfg.zeroFilter.shunt) %>, /**< SHUNT , 单位0.1A*/
+        10, /**< CURRENTM_SAMPLE_CHANNEL_USERDEF1 , 单位0.1A*/
+        10, /**< CURRENTM_SAMPLE_CHANNEL_USERDEF2 , 单位0.1A*/
+    },
+};
+
+
+void hall_dump(void) { /*lint !e957*/
+    sint16 current1, current2;
+    sint16 vol1, vol2;
+    vol1 = Hall_GetSampleVoltage(0U);
+    vol2 = Hall_GetSampleVoltage(1U);
+    current1 = Hall_GetCurrent(0U);
+    current2 = Hall_GetCurrent(1U);
+    (void)printf("HALL:[%dmV]%d.%d,[%dmV]%d.%d\n", vol1, current1 / 10, current1 % 10, vol2, current2 / 10, current2 % 10);
+}

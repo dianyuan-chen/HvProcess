@@ -1,0 +1,37 @@
+CMAKE_MINIMUM_REQUIRED (VERSION 2.8)
+
+SET (HC12_MEMORY_MODEL "Large")
+SET (HC12_CORE         "HCS12X")
+SET (HC12_PRM          "${CMAKE_CURRENT_LIST_DIR}/fbl_driver_exp100.prm")
+SET (HC12_CHIP         "MC9S12XEP100")
+SET (TARGET_ARCH       "hcs12x")
+
+SET (TARGET_C_FLAGS "-D__NO_FLOAT__ -D__MAP_FLASH__ -MapFlash -DFBL_DRV_STAND_ALONE=1")
+SET (CMAKE_CXGATE_LINK_FLAGS "")
+
+INCLUDE ("${CMAKE_CURRENT_LIST_DIR}/../../../toolchain/Toolchain-Generic-chc12.cmake")
+
+
+
+PROJECT (appolo C CXGATE)
+
+
+SET (CMAKE_C_FLAGS "${TARGET_C_FLAGS} ${CMAKE_C_FLAGS}")
+
+ADD_EXECUTABLE (
+    fbl_driver_exp100
+    ${CMAKE_CURRENT_LIST_DIR}/../boot/fbl_driver_exp100.c
+    ${HC12_CHIP_FILE}
+)
+
+INCLUDE_DIRECTORIES (
+    ${CMAKE_CURRENT_LIST_DIR}/..
+    ${CMAKE_CURRENT_LIST_DIR}/../boot
+    ${CMAKE_CURRENT_LIST_DIR}/../../../include
+)
+
+
+ADD_CUSTOM_TARGET (
+    sim
+    COMMAND ${HC12_PATH}/hiwave.exe -Prod=${CMAKE_CURRENT_LIST_DIR}/hiwave/Simulation.ini -cmd="RESET" ${UPC6000_ELF}
+)

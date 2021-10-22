@@ -1,0 +1,64 @@
+#
+# Tool chain support for Freescale (nee Metrowerks) HC12 (S12)
+#
+# To use this invoke CMake like so:
+#
+# Important, make sure you include the ":string" type option, otherwise the entries won't be placed in the
+# cache causing later problems when make automatically invokes a CMake rebuild.
+#
+IF(__CHC12_GENERIC_TOOLCHAIN)
+  RETURN()
+ENDIF(__CHC12_GENERIC_TOOLCHAIN)
+SET(__CHC12_GENERIC_TOOLCHAIN 1)
+
+MESSAGE ("Loaded: Toolchain-Generic-chc12.cmake")
+
+# Look for modules in this path
+SET (CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR})
+#MESSAGE("CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}")
+
+# Path to compiler
+IF (NOT DEFINED HC12_PATH)
+    FIND_PATH(HC12_PATH chc12.exe)
+ENDIF()
+
+SET (CMAKE_SYSTEM_NAME          "Generic")
+SET (CMAKE_SYSTEM_VERSION       "0.0")
+SET (CMAKE_SYSTEM_PROCESSOR     "hc12")
+
+SET (CMAKE_CXGATE_COMPILER   "${HC12_PATH}/cxgate.exe" CACHE FILEPATH "XGATE Compiler" FORCE)
+SET (CMAKE_CXGATE_COMPILER_FORCED TRUE)
+
+SET (CMAKE_AR             "${HC12_PATH}/libmaker.exe" CACHE FILEPATH "Archiver" FORCE)
+SET (CMAKE_AR_FORCED      TRUE)
+
+SET (CMAKE_LINKER         "${HC12_PATH}/linker.exe" CACHE FILEPATH "Linker" FORCE)
+SET (CMAKE_LINKER_FORCED  TRUE)
+
+SET (HC12_BURNER          "${HC12_PATH}/burner.exe" CACHE FILEPATH "Burner" FORCE)
+#SET (CMAKE_ASM_COMPILER   "ping")
+
+SET (CMAKE_ASM_COMPILER   "${HC12_PATH}/ahc12.exe" CACHE FILEPATH "ASM Compiler" FORCE)
+SET (CMAKE_ASM_COMPILER_ID_RUN TRUE)
+SET (CMAKE_ASM_COMPILER_ID hc12)
+SET (CMAKE_ASM_COMPILER_FORCED TRUE)
+ENABLE_LANGUAGE(ASM)
+
+SET (CMAKE_C_COMPILER "${HC12_PATH}/chc12.exe" CACHE FILEPATH "C Compiler" FORCE)
+SET (CMAKE_C_COMPILER_ID_RUN TRUE)
+SET (CMAKE_C_COMPILER_ID hc12)
+SET (CMAKE_C_COMPILER_FORCED TRUE)
+
+SET (CMAKE_CXX_COMPILER "${HC12_PATH}/chc12.exe" CACHE FILEPATH "C++ Compiler" FORCE)
+SET (CMAKE_CXX_COMPILER_ID_RUN TRUE)
+SET (CMAKE_CXX_COMPILER_ID hc12)
+SET (CMAKE_CXX_COMPILER_FORCED TRUE)
+
+
+MESSAGE ("")
+MESSAGE ("C_COMPILER ...................: ${CMAKE_C_COMPILER}")
+MESSAGE ("CXX_COMPILER .................: ${CMAKE_CXX_COMPILER}")
+MESSAGE ("CXGATE_COMPILER ..............: ${CMAKE_CXGATE_COMPILER}")
+MESSAGE ("LINKER .......................: ${CMAKE_LINKER}")
+MESSAGE ("AR ...........................: ${CMAKE_AR}")
+MESSAGE ("")

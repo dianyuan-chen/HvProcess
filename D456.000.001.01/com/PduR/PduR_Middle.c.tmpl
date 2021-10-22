@@ -1,0 +1,154 @@
+#include "PduR.h"
+#include "PduR_Lcfg.h"
+
+<%
+var incs = txs.reduce((acc, x)=>{
+    if (acc.indexOf(x.name)<0) acc.push(x.name);
+    return acc;
+}, []);
+
+incs = rxs.reduce((acc, x)=>{
+    if (acc.indexOf(x.name)<0) acc.push(x.name);
+    return acc;
+}, incs);
+
+for(var x of incs) {
+    if (x != "None") {%>
+#include "<%-x%>_Cbk.h"<%
+    }
+}%>
+
+
+
+BufReq_ReturnType PduR_<%-module%>CopyTxData(const PduIdType  PduId,
+                                        const PduInfoType *const PduInfoPtr,
+                                        const RetryInfoType *const RetryInfoPtr,
+                                        PduLengthType *const TxDataCntPtr)
+{
+    BufReq_ReturnType res = BUFREQ_E_NOT_OK;
+
+<% if (txuppers.length > 0) {%>
+    if (PduId < PDUR_CFG_<%-module.toUpperCase()%>_TX_PDUID_NUM)
+    {
+        switch(PduR_Config-><%-module%>TxPduIdConfig[PduId].Module)
+        {<%
+        for (var v of txuppers) {%>
+            case PDUR_<%-v.toUpperCase()%>:
+                res = <%-v%>_CopyTxData(PduR_Config-><%-module%>TxPduIdConfig[PduId].PduId, PduInfoPtr, RetryInfoPtr, TxDataCntPtr);
+                break;<%
+        }%>
+            default:
+                break;
+        }
+    }
+<% } else {%>
+    (void)PduId;
+    (void)PduInfoPtr;
+    (void)RetryInfoPtr;
+    (void)TxDataCntPtr;
+<% } %>
+    return res;
+}
+
+void PduR_<%-module%>TxConfirmation(PduIdType PduId, const NotifResultType Result)
+{
+<% if (txuppers.length > 0) {%>
+    if (PduId < PDUR_CFG_<%-module.toUpperCase()%>_TX_PDUID_NUM)
+    {
+        switch(PduR_Config-><%-module%>TxPduIdConfig[PduId].Module)
+        {<%
+        for (var v of txuppers) {%>
+            case PDUR_<%-v.toUpperCase()%>:
+                <%-v%>_TxConfirmation(PduR_Config-><%-module%>TxPduIdConfig[PduId].PduId, Result);
+                break;<%
+        }%>
+            default:
+                break;
+        }
+    }
+<% } else {%>
+    (void)PduId;
+    (void)Result;
+
+<% } %>
+}
+
+
+BufReq_ReturnType PduR_<%-module%>StartOfReception(const PduIdType PduId,
+                                            const PduLengthType SduLength,
+                                            PduLengthType *const BufferSizePtr)
+{
+    BufReq_ReturnType res = BUFREQ_E_NOT_OK;
+
+<% if (rxuppers.length > 0) {%>
+    if (PduId < PDUR_CFG_<%-module.toUpperCase()%>_RX_PDUID_NUM)
+    {
+        switch(PduR_Config-><%-module%>RxPduIdConfig[PduId].Module)
+        {<%
+        for (var v of rxuppers) {%>
+            case PDUR_<%-v.toUpperCase()%>:
+                res = <%-v%>_StartOfReception(PduR_Config-><%-module%>RxPduIdConfig[PduId].PduId, SduLength, BufferSizePtr);
+                break;<%
+        }%>
+            default:
+                break;
+        }
+    }
+<% } else {%>
+    (void)PduId;
+    (void)SduLength;
+    (void)BufferSizePtr;
+<% } %>
+    return res;
+}
+
+BufReq_ReturnType PduR_<%-module%>CopyRxData(const PduIdType  PduId,
+                                        const PduInfoType *const PduInfoPointer,
+                                        PduLengthType *const RxBufferSizePtr)
+{
+    BufReq_ReturnType res = BUFREQ_E_NOT_OK;
+
+<% if (rxuppers.length > 0) {%>
+    if (PduId < PDUR_CFG_<%-module.toUpperCase()%>_RX_PDUID_NUM)
+    {
+        switch(PduR_Config-><%-module%>RxPduIdConfig[PduId].Module)
+        {<%
+        for (var v of rxuppers) {%>
+            case PDUR_<%-v.toUpperCase()%>:
+                res = <%-v%>_CopyRxData(PduR_Config-><%-module%>RxPduIdConfig[PduId].PduId, PduInfoPointer, RxBufferSizePtr);
+                break;<%
+        }%>
+            default:
+                break;
+        }
+    }
+<% } else {%>
+    (void)PduId;
+    (void)PduInfoPointer;
+    (void)RxBufferSizePtr;
+<% } %>
+    return res;
+}
+
+
+void PduR_<%-module%>RxIndication(const PduIdType PduId, const NotifResultType Result)
+{
+<% if (rxuppers.length > 0) {%>
+    if (PduId < PDUR_CFG_<%-module.toUpperCase()%>_RX_PDUID_NUM)
+    {
+        switch(PduR_Config-><%-module%>RxPduIdConfig[PduId].Module)
+        {<%
+        for (var v of rxuppers) {%>
+            case PDUR_<%-v.toUpperCase()%>:
+                <%-v%>_RxIndication(PduR_Config-><%-module%>RxPduIdConfig[PduId].PduId, Result);
+                break;<%
+        }%>
+            default:
+                break;
+        }
+    }
+<% } else {%>
+    (void)PduId;
+    (void)Result;
+<% } %>
+}

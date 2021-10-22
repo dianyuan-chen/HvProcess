@@ -1,0 +1,33 @@
+/**
+ * \file BatteryInfo_Lcfg.c
+ * \copyright UDAN Co.,Ltd. *
+ *
+ * \brief 电池信息文件.
+ *
+ * * \par 修订历史:
+ * | 版本号 | 修订日志 | 修改人 | 修订时间 |
+ * | :--- | :--- | :--- | :--- |
+ * | 0.1 | 初始版本, 完成讨论部分的定义. | UD00004 | 20161221 |
+ */
+
+#include "BatteryInfo.h"
+
+const BatteryInfo_BaseConfigType BatteryInfo_BaseConfigInfo = {
+    (uint8)<%-batttype%>, /**< Type: 电池类型 */
+    <%-capAH * 10%>U, /**< NominalCap: 额定容量 */
+    <%-dischargecurrent * 10%>U, /**< NominalDischargeCurrent: 额定放电电流 */
+    <%-totalvoltage * 10%>U, /**< NominalTotalVolt: 额定总压 */
+    <%-dcchargecurrent * 10%>U, /**< NominalDCCurrent: 快充额定电流 */
+    <%-acchargecurrent * 10%>U, /**< NominalACCurrent: 慢充额定电流 */
+    <%-serialnum%>U, /**< SeriesNum: 电池串数 */
+    <%-parallelnum%>U, /**< ParallelNum: 电池并数 */
+    <%-celltempnum%>U, /**< CellTemperatureNum: 温感数 */
+    <%-initsoc * 10%>U, /**< InitialSOC: 初始SOC */
+    <%-initsoh * 10%>U, /**< InitialSOH: 初始SOH */
+    <%-poletempnum%>U, /**< 极柱温感数*/
+    <%-heattempnum%>U, /**< 加热温感数*/
+    <%-highVoltLimit%>U, /**< 单体电压高极限保护 */
+    <%-lowVoltLimit%>U, /**< 单体电压低极限保护 */
+    <% if (highTempLimit != 0xff) { %>(App_TemperatureType)TEMPERATURE_FROM_C(<%-highTempLimit%>), /**< 单体温度高极限保护 */<% } else { %>0xFFU, /**< 单体温度高极限保护 */<% } %>
+    <%-limitProtectDelay%>UL, /**< 极限保护延时 */
+};

@@ -1,0 +1,47 @@
+/**
+ * \file AppInfo.h
+ * \copyright UDAN Co.,Ltd.
+ * \note
+ *     本文件(AppInfo.h)由 cmake 使用模板 AppInfo.h.in 文件自动生成
+ *     请勿手动编辑本文件,相关修改请移至 AppInfo.h.in 文件内
+ *
+ * \par 修改历史
+ * | 版本号 | 修订日志 | 修改人 | 修订时间 |
+ * |:------:|:---------|:------:|:--------:|
+ * | 0.1 | 按文档定义的软件标识 | UD0010 | 20170106 |
+ */
+
+#ifndef __APPINFO_H__
+#define __APPINFO_H__
+
+
+#include "LibInfo.h"
+
+/**
+ * 以下宏定义由cmake自动生成,不需要手动修改
+ */
+#define APP_INFO_SOURCE_COMMIT_ID        "<%- srcCommitID %>"
+#define APP_INFO_CONFIG_COMMIT_ID        "<%- srcCommitID %>"
+#define APP_INFO_BUILD_TIME              "<%- buildTimeStr %>"
+
+#define APP_INFO_BUILD_DATE_Y            <%- buildTime.getFullYear() %>U
+#define APP_INFO_BUILD_DATE_M            <%- buildTime.getMonth() + 1%>U
+#define APP_INFO_BUILD_DATE_D            <%- buildTime.getDate() %>U
+
+#define APP_INFO_BUILD_TIME_H            <%- buildTime.getHours() %>U
+#define APP_INFO_BUILD_TIME_M            <%- buildTime.getMinutes() %>U
+#define APP_INFO_BUILD_TIME_S            <%- buildTime.getSeconds() %>U
+
+#define APP_INFO_TEST_VERSION            <%- isTestVersion %>U
+
+
+<% if (appVersion != "") {%>
+extern const uint8 AppInfo_AppVerion[3];
+<%}%>
+
+#pragma push
+#pragma CONST_SEG __GPAGE_SEG APP_INFO
+extern const Boot_AppInfoTagType AppInfoTag;
+#pragma pop
+
+#endif

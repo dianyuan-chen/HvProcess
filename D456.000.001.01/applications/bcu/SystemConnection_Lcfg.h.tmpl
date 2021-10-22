@@ -1,0 +1,30 @@
+#ifndef SYSTEMCONNECTION_LCFG_H_
+#define SYSTEMCONNECTION_LCFG_H_
+
+#include "DeviceInfo.h"
+
+/**
+ * \brief 实际从机个数定义
+ */
+#define SYSTEM_BMU_NUM                    <%-Bmus.length%>U
+#define SYSTEM_BATTERY_CELL_NUM           <%-BmuBatt.LogicIdMax.slice(-1)[0]%>U
+#define SYSTEM_BATTERY_SAMPLE_BOARD_NUM   <%-BmuBatt.BoardLogicIdMax.length%>U
+#define SYSTEM_SAMPLE_BOARD_NUM_ON_DAISY_CHAIN <%- SampleBoardNumOnDaisyChain %>U
+#define SYSTEM_TEMP_CELL_NUM              <%-BmuCellTemp.LogicIdMax.slice(-1)[0]%>U
+#define SYSTEM_HEAT_TEMP_NUM              <%-BmuHeatTemp.LogicIdMax.slice(-1)[0]%>U
+#define SYSTEM_POLE_TEMP_NUM              <%-BmuPoleTemp.LogicIdMax.slice(-1)[0]%>U
+#define SYSTEM_TEMP_SAMPLE_BOARD_NUM      <%-BmuCellTemp.BoardLogicIdMax.length%>U
+
+#define SYSTEM_BCU_SUPPORT_DTU            <%-BcuSupportDtu%>U
+#define SYSTEM_BCU_IS_ALL_IN_ONE          <%-BcuIsAllInOne%>U
+
+#define SYSTEM_CELL_TEMPERATURE_SENSOR_EN <%-BmuCellTemp.LogicIdMax.slice(-1)[0] > 0 ? "STD_ON" : "STD_OFF"%>
+#define SYSTEM_HEAT_TEMPERATURE_SENSOR_EN <%-BmuHeatTemp.LogicIdMax.slice(-1)[0] > 0 ? "STD_ON" : "STD_OFF"%>
+#define SYSTEM_POLE_TEMPERATURE_SENSOR_EN <%-BmuPoleTemp.LogicIdMax.slice(-1)[0] > 0 ? "STD_ON" : "STD_OFF"%>
+
+
+#endif
+
+/**
+ * \}
+ */

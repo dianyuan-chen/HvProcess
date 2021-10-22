@@ -1,0 +1,44 @@
+/**
+ * \addtogroup Diagnosis
+ */
+
+#ifndef DIAGNOSIS_CFG_H_
+#define DIAGNOSIS_CFG_H_
+
+#include "ChgSckTmpM_Cfg.h"
+
+#define DIAGNOSIS_DEV_ERROR_DETECT          STD_OFF
+
+#define DIAGNOSIS_SUPPORT_LEVEL             4U /**< 支持的报警等级 */
+
+#define DIAGNOSIS_CALIB_ITEM_NUM            (((uint8)DIAGNOSIS_ITEM_CALIBRATE_STOP-(uint8)DIAGNOSIS_ITEM_CALIBRATE_START)+1U)
+#define DIAGNOSIS_ITEM_DEFAULT_NUM          ((((uint8)DIAGNOSIS_ITEM_CALIBRATE_STOP-(uint8)DIAGNOSIS_ITEM_CALIBRATE_START)+1U) + \
+                                            ((uint8)DIAGNOSIS_ITEM_NONE_CALIBRATE_STOP-(uint8)DIAGNOSIS_ITEM_NONE_CALIBRATE_START)+1U)
+
+#define DIAGNOSIS_IS_CALIB_ITEM(item)       ((item) >= DIAGNOSIS_ITEM_CALIBRATE_START && (item) <= DIAGNOSIS_ITEM_CALIBRATE_STOP)
+#define DIAGNOSIS_IS_NONE_CALIB_ITEM(item)  ((item) >= DIAGNOSIS_ITEM_NONE_CALIBRATE_START && (item) <= DIAGNOSIS_ITEM_NONE_CALIBRATE_STOP)
+
+
+/**
+ * \brief 诊断条目.
+ */
+typedef enum {<%
+var max_num;
+for (var cfg of infoconfig) {%>
+    DIAGNOSIS_ITEM_<%- cfg.itemDef %> = <%- cfg.itemDefVal %>, /**< <%- cfg.name %> */<%
+    for (var alt of cfg.itemAltdef) {%>
+    DIAGNOSIS_ITEM_<%- alt %> = <%- cfg.itemDefVal %>,<%
+    max_num = cfg.itemDefVal;
+    }
+}
+%>
+
+    DIAGNOSIS_ITEM_MAX_NUM = <%- max_num + 1 %>,
+
+    DIAGNOSIS_ITEM_INVALID_INDEX = 0xFF /**< 无效编号 */
+} Diagnosis_ItemType;
+
+
+#endif
+
+/** \} */
