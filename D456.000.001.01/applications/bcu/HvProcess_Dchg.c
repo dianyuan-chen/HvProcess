@@ -56,13 +56,68 @@ void HvProcess_DchgPoll(void)
 
 static boolean HvProcess_DchgRelayIsNormal(void)
 {
-
+    boolean res = FALSE;
+    if(RELAYM_DIAGNOSIS_IS_NORMAL(RelayM_GetDiagnosisStatus(RELAYM_FN_POSITIVE_MAIN)))
+    {
+        if(RELAYM_DIAGNOSIS_IS_NORMAL(RelayM_GetDiagnosisStatus(RELAYM_FN_PRECHARGE)))
+        {
+            if(RELAYM_DIAGNOSIS_IS_NORMAL(RelayM_GetDiagnosisStatus(RELAYM_FN_CHARGE)))
+            {
+                res = TRUE;
+            }
+        }
+    }
+    return res;
 }
 
 
 boolean HvProcess_DchgStateStartCond(void)
 {
-
+/*  >判断充电是否已连接，是否唤醒
+        >判断充电状态是否在START状态
+            >判断继电器故障检查标志 及 现在时间是否大于500
+                >继电器故障检查标志置TRUE
+                >启动继电器的粘连检测
+            >判断故障检查标志是否置TRUE
+                    >获取继电器的诊断状态，检查继电器是否正常
+                        >判断是否允许放电；检测DCC信号
+*/
+    boolean res = FALSE;
+    uint32 nowTime = OSTimeGet();
+    uint8 wakeup = RuntimeM_GetWakeSignal();
+    if(!CHARGECONNECTM_IS_CONNECT() && wakeup > 0U)
+    {
+        if(HvProcess_GetChgState() == HVPROCESS_CHG_START)
+        {
+            if(!HvProcess_DchgInnerData.RelayFaultCheckFlag && nowTime >= 300U)
+            {
+                HvProcess_ChgInnerData.RelayFaultCheckFlag == TRUE;
+                if(RELAYM_GetActualStatus(RELAYM_FN_POSITIVE_MAIN) == RELAYM_ACTUAL_OFF)
+                {
+                    if(RELAYM_GetActualStatus(RELAYM_FN_PRECHARGE) == RELAYM_ACTUAL_OFF)
+                    {
+                        (void)RelayM_StartAdhesiveDetect(RELAYM_FN_POSITIVE_MAIN, NULL);
+                        (void)RelayM_StartAdhesiveDetect(RELAYM_FN_PRECHARGE, NULL);
+                    }
+                }
+                if(RELAYM_GetActualStatus(RELAYM_FN_CHARGE) == RELAYM_ACTUAL_OFF)
+                {
+                    (void)RelayM_StartAdhesiveDetect(RELAYM_FN_CHARGE, NULL);
+                }
+            }
+        }
+        if(HvProcess_DchgInnerData.RelayFaultCheckFlag)
+        {
+            if(HvProcess_DchgRelayIsNormal())
+            {
+                if(DischargeM_DischargeIsAllowed())
+                {
+                    res = TRUE;
+                }
+            }
+        }
+    }
+    return res;
 }
 
 void HvProcess_DchgStateStartAction(void)

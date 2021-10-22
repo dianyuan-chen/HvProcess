@@ -13,21 +13,57 @@
 #include "HvProcess_Chg.h"
 
 const HvProcess_StateInfoType HvProcess_ChgStartInfoConfig[] = {
-
+    {
+        HvProcess_ChgStateStartCond,
+        HvProcess_ChgStateStartAction,
+        HVPROCESS_CHG_HV_ON,
+    }
 };
 
 const HvProcess_StateInfoType HvProcess_ChgHvOnInfoConfig[] = {
-
+    {
+        HvProcess_ChgChargeConnectionCond,
+        HvProcess_ChgChargeConnectionAction,
+        HVPROCESS_CHG_RELAY_OFF_DELAY,
+    },
+    {
+        HvProcess_ChgFaultCond,
+        HvProcess_ChgFaultAction,
+        HVPROCESS_CHG_RELAY_OFF_DELAY,
+    }
 };
 
 const HvProcess_StateInfoType HvProcess_ChgRelayOffDelayInfoConfig[] = {
-
+    {
+        HvProcess_ChgRelayOffDelayCond,
+        HvProcess_ChgRelayOffDelayAction,
+        HVPROCESS_CHG_RESTART,
+    }
 };
 
 const HvProcess_StateInfoType HvProcess_ChgRestartAllowedInfoConfig[] = {
-
+    {
+        HvProcess_ChgRestartAllowedCond,
+        NULL,
+        HVPROCESS_CHG_START,
+    }
 };
 
 const HvProcess_StateConfigType HvProcess_ChgStateConfig[HVPROCESS_CHG_STATE_MAX] = {
-
+    {
+        (uint8)ARRAY_SIZE(HvProcess_ChgStartInfoConfig),
+        HvProcess_ChgStartInfoConfig,
+    },
+    {
+        (uint8)ARRAY_SIZE(HvProcess_ChgHvOnInfoConfig),
+        HvProcess_ChgHvOnInfoConfig,
+    },
+    {
+        (uint8)ARRAY_SIZE(HvProcess_ChgRelayOffDelayInfoConfig),
+        HvProcess_ChgRelayOffDelayInfoConfig,
+    },
+    {
+        (uint8)ARRAY_SIZE(HvProcess_ChgRestartAllowedInfoConfig),
+        HvProcess_ChgRestartAllowedInfoConfig,
+    }
 };

@@ -13,26 +13,80 @@
 #include "HvProcess_Dchg.h"
 
 const HvProcess_StateInfoType HvProcess_DchgStartInfoConfig[] = {
-
+    {
+        HvProcess_DchgStateStartCond,
+        HvProcess_DchgStateStartAction,
+        HVPROCESS_DCHG_PRECHARGE,
+    }
 };
 
 const HvProcess_StateInfoType HvProcess_DchgPrechargeInfoConfig[] = {
-
+    {
+        HvProcess_DchgChargeConnectionCond,
+        HvProcess_DchgChargeConnectionAction,
+        HVPROCESS_DCHG_RELAY_OFF_DELAY,
+    },
+    {
+        HvProcess_DchgFaultCond,
+        HvProcess_DchgFaultAction,
+        HVPROCESS_DCHG_RELAY_OFF_DELAY,
+    },
+    {
+        HvProcess_DchgStatePrechargeCond,
+        HvProcess_DchgStatePrechargeAction,
+        HVPROCESS_DCHG_HV_ON,
+    }
 };
 
 const HvProcess_StateInfoType HvProcess_DchgHvOnInfoConfig[] = {
-
+    {
+        HvProcess_DchgChargeConnectionCond,
+        HvProcess_DchgChargeConnectionAction,
+        HVPROCESS_DCHG_RELAY_OFF_DELAY,
+    },
+    {
+        HvProcess_DchgFaultCond,
+        HvProcess_DchgFaultAction,
+        HVPROCESS_DCHG_RELAY_OFF_DELAY,
+    },
 };
 
 const HvProcess_StateInfoType HvProcess_DchgRelayOffDelayInfoConfig[] = {
-
+    {
+        HvProcess_DchgRelayOffDelayCond,
+        HvProcess_DchgRelayOffDelayAction,
+        HVPROCESS_DCHG_RESTART_ALLOW,
+    }
 };
 
 const HvProcess_StateInfoType HvProcess_DchgRestartInfoConfig[] = {
-
+    {
+        HvProcess_DchgRestartAllowedCond,
+        NULL,
+        HVPROCESS_DCHG_START,
+    }
 };
 
 const HvProcess_StateConfigType HvProcess_DchgStateConfig[HVPROCESS_DCHG_STATE_MAX] = {
-
+    {
+        (uint8)ARRAY_SIZE(HvProcess_DchgStartInfoConfig),
+        HvProcess_DchgStartInfoConfig,
+    },
+    {
+        (uint8)ARRAY_SIZE(HvProcess_DchgPrechargeInfoConfig),
+        HvProcess_DchgPrechargeInfoConfig,
+    },
+    {
+        (uint8)ARRAY_SIZE(HvProcess_DchgHvOnInfoConfig),
+        Hvprocess_DchgHvOnInfoConfig,
+    },
+    {
+        (uint8)ARRAY_SIZE(HvProcess_DchgRelayOffDelayInfoConfig),
+        HvProcess_DchgRelayOffDelayInfoConfig,
+    },
+    {
+        (uint8)ARRAY_SIZE(HvProcess_DchgRestartInfoConfig),
+        HvProcess_DchgRestartInfiConfig,
+    },
 };
 
