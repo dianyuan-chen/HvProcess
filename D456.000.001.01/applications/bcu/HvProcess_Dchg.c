@@ -85,6 +85,7 @@ boolean HvProcess_DchgStateStartCond(void)
     boolean res = FALSE;
     uint32 nowTime = OSTimeGet();
     uint8 wakeup = RuntimeM_GetWakeSignal();
+    Dio_LevelType dccOn = Dio_ReadChannel(DIO_CHANNEL_CHARGER_READY);
     if(!CHARGECONNECTM_IS_CONNECT() && wakeup > 0U)
     {
         if(HvProcess_GetChgState() == HVPROCESS_CHG_START)
@@ -110,7 +111,7 @@ boolean HvProcess_DchgStateStartCond(void)
         {
             if(HvProcess_DchgRelayIsNormal())
             {
-                if(DischargeM_DischargeIsAllowed())
+                if(DischargeM_DischargeIsAllowed() == E_OK && dccON != STD_LOW)
                 {
                     res = TRUE;
                 }
@@ -122,27 +123,54 @@ boolean HvProcess_DchgStateStartCond(void)
 
 void HvProcess_DchgStateStartAction(void)
 {
-
+    //开始预充
+    PrechargeM_Start();
 }
 
 boolean HvProcess_DchgStatePrechargeCond(void)
 {
+    //判断预充是否完成
+    boolean res = FALSE;
 
+    if(PrechargeM_IsFinish() == TRUE)
+    {
+        res = TRUE;
+    }
+
+    return res;
 }
 
 void HvProcess_DchgStatePrechargeAction(void)
 {
+    //闭合主正
     (void)RelayM_Control(RELAYM_FN_POSITIVE_MAIN, RELAYM_CONTROL_ON);
 }
 
 boolean HvProcess_DchgChargeConnectionCond(void)
 {
+    /*
+    >判断充电是否已连接
+    >判断是否有DCC信号
+    */
+    boolean res = FALSE;
 
+    if(CHARGECONNECTM_IS_CONNECT())
+    {
+        res = TRUE;
+    }
+    if(Dio_ReadChannel(DIO_CHANNEL_CHARGER_READY) == STD_LOW)
+    {
+        res = TRUE;
+    }
+
+    return res;
 }
 
 void HvProcess_DchgChargeConnectionAction(void)
 {
-
+    //置继电器断开时间为当前时间；停止预充
+    HvProcess_DchgInnerDate.RelayOffTick = OSTimeGet();
+    PrechargeM_Stop();
 }
 
 static const Diagnosis_ItemType items[4U] = {
@@ -154,25 +182,117 @@ static const Diagnosis_ItemType items[4U] = {
 
 boolean HvProcess_DchgFaultCond(void)
 {
+    /*
+    >判断是否有放电故障
+        >排除指定诊断序列后当前放电故障标志是否成立，若成立，延时为0
+        >判断时间是否超过延时
+    */
+    boolean res = FALSE;
+    uint32 nowTime = OSTimeGet() ,delay = 3000UL;
+    static uint32 lastTime = 0UL, monitorTime = 0UL;
 
+    if(MS_GET_INTERNAL(monitorTime, nowTime) > 300U)
+    {
+        lastTime = 0U;
+    }
+    monitorTime = nowTime;
+
+    if(DischargeM_DischargeIsFault() == E_OK)
+    {
+        if(DischargeM_DiagnosisIsFaultFlagExculdeItems(items, 4U) == E_OK)
+        {
+            delay = 0U;
+        }
+        if(lastTime == 0U)
+        {
+            lastTime = nowTime;
+        }
+        if(MS_GET_INTERNAL(lastTime, nowTime) >= delay)
+        {
+            res = TRUE;
+            lastTime = 0U;
+        }
+    }
+    else
+    {
+        lastTime = 0;
+    }
+
+    return res;
 }
 
 void HvProcess_DchgFaultAction(void)
 {
-
+    //置继电器断开时间为当前时间；停止预充
+    HvProcess_DchgInnerData.RelayOffTick = OSTimeGet();
+    PrechargeM_Stop();
 }
 
 boolean HvProcess_DchgRelayOffDelayCond(void)
 {
+    //延时500毫秒，置继电器断开时间为当前时间
+    boolean res = FALSE;
+    uint8 delay = 500U;
+    uint32 nowTime = OSTimeGet();
+    static uint32 lastTime = HvProcess_DchgInnerDate.RelayOffTick;
 
+    if(MS_GET_INTERNAL(lastTime, nowTime) > delay)
+    {
+        res = TRUE;
+        HvProcess_DchgInnerDate.RelayOffTick = nowTime;
+    }
+
+    return res;
 }
 
 void HvProcess_DchgRelayOffDelayAction(void)
 {
-
+    /*
+        >断开主正
+        >置继电器断开时间啊为当前时间
+        >置继电器故障检查标志为FALSE
+    */
+    (void)RelayM_Control(RELAYM_FN_POSITIVE_MAIN, RELAY_CONTROL_OFF);
+    HvProcess_DchgInnerDate.RelayOffTick = OSTimeGet();
+    HvProcess_DchgInnerDate.RelayFaultCheckFlag = FALSE;
 }
 
 boolean HvProcess_DchgRestartAllowedCond(void)
 {
+    /*
+        >判断总压是否有效定义
+            >判断后端电压是否高于前端电压90%（若高于90%会报粘连故障）,若低于90%，延时2000ms
+        >判断是否到达延时时间
+    */
+    boolean res = FALSE;
+    uint8 delay = 30000U;
+    App_Tv100mvType bat_tv = Hv_GetVoltage(HV_CHANNEL_BPOS), hv1 = Hv_GetVoltage(HV_CHANNEL_HV1), hv2 = HV_GetVoltage(HV_CHANNEL_HV2);
+    uint32 nowTime = OSTimeGet();
+    static uint32 lastTime = 0UL;
 
+    if (Statistic_TotalVoltageIsValid(bat_tv))
+    {
+        if (Statistic_TotalVoltageIsValid(hv1))
+        {
+            if (Statistic_TotalVoltageIsValid(hv2))
+            {
+                bat_tv = (APP_Tv100mvType)((uint32)bat_tv * (uint32)RelayMConfigData[RELAYM_FN_POSITIVE_MAIN].totalPercent / 100UL);
+                if (hv1 <= bat_tv && hv2 <= bat_tv)
+                {
+                    delay = 2000U;
+                }
+            }
+        }
+    }
+    if(lastTime == 0UL)
+    {
+        lastTime = nowTIme;
+    }
+    if (MS_GET_INTERNAL(lastTime, nowTime) > delay)
+    {
+        lastTime = 0UL;
+        res = TRUE;
+    }
+
+    return res;
 }
