@@ -16,7 +16,7 @@ const HvProcess_StateInfoType HvProcess_ChgStartInfoConfig[] = {
     {
         HvProcess_ChgStateStartCond,
         HvProcess_ChgStateStartAction,
-        HVPROCESS_CHG_HV_ON,
+        (uint16)HVPROCESS_CHG_HV_ON,
     }
 };
 
@@ -24,12 +24,12 @@ const HvProcess_StateInfoType HvProcess_ChgHvOnInfoConfig[] = {
     {
         HvProcess_ChgChargeConnectionCond,
         HvProcess_ChgChargeConnectionAction,
-        HVPROCESS_CHG_RELAY_OFF_DELAY,
+        (uint16)HVPROCESS_CHG_RELAY_OFF_DELAY,
     },
     {
         HvProcess_ChgFaultCond,
         HvProcess_ChgFaultAction,
-        HVPROCESS_CHG_RELAY_OFF_DELAY,
+        (uint16)HVPROCESS_CHG_RELAY_OFF_DELAY,
     }
 };
 
@@ -37,7 +37,7 @@ const HvProcess_StateInfoType HvProcess_ChgRelayOffDelayInfoConfig[] = {
     {
         HvProcess_ChgRelayOffDelayCond,
         HvProcess_ChgRelayOffDelayAction,
-        HVPROCESS_CHG_RESTART,
+        (uint16)HVPROCESS_CHG_RESTART,
     }
 };
 
@@ -45,7 +45,7 @@ const HvProcess_StateInfoType HvProcess_ChgRestartAllowedInfoConfig[] = {
     {
         HvProcess_ChgRestartAllowedCond,
         NULL,
-        HVPROCESS_CHG_START,
+        (uint16)HVPROCESS_CHG_START,
     }
 };
 

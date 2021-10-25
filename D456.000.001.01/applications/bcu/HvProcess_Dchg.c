@@ -86,38 +86,39 @@ boolean HvProcess_DchgStateStartCond(void)
     uint32 nowTime = OSTimeGet();
     uint8 wakeup = RuntimeM_GetWakeSignal();
     Dio_LevelType dccOn = Dio_ReadChannel(DIO_CHANNEL_CHARGER_READY);
-    if(!CHARGECONNECTM_IS_CONNECT() && wakeup > 0U)
+    if (!CHARGECONNECTM_IS_CONNECT() && wakeup > 0U)
     {
-        if(HvProcess_GetChgState() == HVPROCESS_CHG_START)
+        if (HvProcess_GetChgState() == HVPROCESS_CHG_START)
         {
-            if(!HvProcess_DchgInnerData.RelayFaultCheckFlag && nowTime >= 300U)
+            if (!HvProcess_DchgInnerData.RelayFaultCheckFlag && nowTime >= 500UL)
             {
-                HvProcess_ChgInnerData.RelayFaultCheckFlag == TRUE;
-                if(RelayM_GetActualStatus(RELAYM_FN_POSITIVE_MAIN) == RELAYM_ACTUAL_OFF)
+                HvProcess_DchgInnerData.RelayFaultCheckFlag = TRUE;
+                if (RelayM_GetActualStatus(RELAYM_FN_POSITIVE_MAIN) == RELAYM_ACTUAL_OFF)
                 {
-                    if(RelayM_GetActualStatus(RELAYM_FN_PRECHARGE) == RELAYM_ACTUAL_OFF)
+                    if (RelayM_GetActualStatus(RELAYM_FN_PRECHARGE) == RELAYM_ACTUAL_OFF)
                     {
                         (void)RelayM_StartAdhesiveDetect(RELAYM_FN_POSITIVE_MAIN, NULL);
                         (void)RelayM_StartAdhesiveDetect(RELAYM_FN_PRECHARGE, NULL);
                     }
                 }
-                if(RelayM_GetActualStatus(RELAYM_FN_CHARGE) == RELAYM_ACTUAL_OFF)
+                if (RelayM_GetActualStatus(RELAYM_FN_CHARGE) == RELAYM_ACTUAL_OFF)
                 {
                     (void)RelayM_StartAdhesiveDetect(RELAYM_FN_CHARGE, NULL);
                 }
             }
-        }
-        if(HvProcess_DchgInnerData.RelayFaultCheckFlag)
-        {
-            if(HvProcess_DchgRelayIsNormal())
+            if (HvProcess_DchgInnerData.RelayFaultCheckFlag == TRUE)
             {
-                if(DischargeM_DischargeIsAllowed() == E_OK && dccON != STD_LOW)
+                if (HvProcess_DchgRelayIsNormal())
                 {
-                    res = TRUE;
+                    if (DischargeM_DischargeIsAllowed() == E_OK && dccOn != STD_LOW)
+                    {
+                        res = TRUE;
+                    }
                 }
             }
         }
     }
+
     return res;
 }
 
@@ -169,7 +170,7 @@ boolean HvProcess_DchgChargeConnectionCond(void)
 void HvProcess_DchgChargeConnectionAction(void)
 {
     //置继电器断开时间为当前时间；停止预充
-    HvProcess_DchgInnerDate.RelayOffTick = OSTimeGet();
+    HvProcess_DchgInnerData.RelayOffTick = OSTimeGet();
     PrechargeM_Stop();
 }
 
@@ -199,7 +200,7 @@ boolean HvProcess_DchgFaultCond(void)
 
     if(DischargeM_DischargeIsFault() == E_OK)
     {
-        if(DischargeM_StartDiagIsFaultExcludeItems(items, 4U) == E_OK)
+        if(DischargeM_DiagnosisIsFaultFlagExcludeItems(items, 4U) == E_OK)
         {
             delay = 0U;
         }
@@ -232,14 +233,12 @@ boolean HvProcess_DchgRelayOffDelayCond(void)
 {
     //延时500毫秒，置继电器断开时间为当前时间
     boolean res = FALSE;
-    uint8 delay = 500U;
     uint32 nowTime = OSTimeGet();
-    static uint32 lastTime = HvProcess_DchgInnerDate.RelayOffTick;
 
-    if(MS_GET_INTERNAL(lastTime, nowTime) > delay)
+    if(MS_GET_INTERNAL(HvProcess_DchgInnerData.RelayOffTick, nowTime) >= 500UL)
     {
         res = TRUE;
-        HvProcess_DchgInnerDate.RelayOffTick = nowTime;
+        HvProcess_DchgInnerData.RelayOffTick = nowTime;
     }
 
     return res;
@@ -252,9 +251,9 @@ void HvProcess_DchgRelayOffDelayAction(void)
         >置继电器断开时间啊为当前时间
         >置继电器故障检查标志为FALSE
     */
-    (void)RelayM_Control(RELAYM_FN_POSITIVE_MAIN, RELAY_CONTROL_OFF);
-    HvProcess_DchgInnerDate.RelayOffTick = OSTimeGet();
-    HvProcess_DchgInnerDate.RelayFaultCheckFlag = FALSE;
+    (void)RelayM_Control(RELAYM_FN_POSITIVE_MAIN, RELAYM_CONTROL_OFF);
+    HvProcess_DchgInnerData.RelayOffTick = OSTimeGet();
+    HvProcess_DchgInnerData.RelayFaultCheckFlag = FALSE;
 }
 
 boolean HvProcess_DchgRestartAllowedCond(void)
@@ -265,8 +264,8 @@ boolean HvProcess_DchgRestartAllowedCond(void)
         >判断是否到达延时时间
     */
     boolean res = FALSE;
-    uint8 delay = 30000U;
-    App_Tv100mvType bat_tv = Hv_GetVoltage(HV_CHANNEL_BPOS), hv1 = Hv_GetVoltage(HV_CHANNEL_HV1), hv2 = HV_GetVoltage(HV_CHANNEL_HV2);
+    uint32 delay = 30000UL;
+    App_Tv100mvType bat_tv = HV_GetVoltage(HV_CHANNEL_BPOS), hv1 = HV_GetVoltage(HV_CHANNEL_HV1), hv2 = HV_GetVoltage(HV_CHANNEL_HV2);
     uint32 nowTime = OSTimeGet();
     static uint32 lastTime = 0UL;
 
@@ -276,7 +275,7 @@ boolean HvProcess_DchgRestartAllowedCond(void)
         {
             if (Statistic_TotalVoltageIsValid(hv2))
             {
-                bat_tv = (APP_Tv100mvType)((uint32)bat_tv * (uint32)RelayMConfigData[RELAYM_FN_POSITIVE_MAIN].totalPercent / 100UL);
+                bat_tv = (App_Tv100mvType)((uint32)bat_tv * (uint32)RelayMConfigData[RELAYM_FN_POSITIVE_MAIN].totalPercent / 100UL);
                 if (hv1 <= bat_tv && hv2 <= bat_tv)
                 {
                     delay = 2000U;
@@ -286,7 +285,7 @@ boolean HvProcess_DchgRestartAllowedCond(void)
     }
     if(lastTime == 0UL)
     {
-        lastTime = nowTIme;
+        lastTime = nowTime;
     }
     if (MS_GET_INTERNAL(lastTime, nowTime) > delay)
     {

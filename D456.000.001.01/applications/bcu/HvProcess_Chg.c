@@ -68,7 +68,7 @@ static boolean HvProcess_ChgRelayIsNormal(void)
     {
         if(RELAYM_DIAGNOSIS_IS_NORMAL(RelayM_GetDiagnosisStatus(RELAYM_FN_PRECHARGE)))
         {
-            if(RELAYM_DIAGNOSIS_ISNORMAL(RelayM_GetDiagnosisStatus(RELAYM_FN_CHARGE)))
+            if(RELAYM_DIAGNOSIS_IS_NORMAL(RelayM_GetDiagnosisStatus(RELAYM_FN_CHARGE)))
             {
                 res = TRUE;
             }
@@ -132,7 +132,7 @@ boolean HvProcess_ChgStateStartCond(void)
 void HvProcess_ChgStateStartAction(void)
 {
     //闭合充电继电器
-    (void)RelayM_Control(RELAYM_FN_CAHRGE, RELAYM_CONTROL_ON);
+    (void)RelayM_Control(RELAYM_FN_CHARGE, RELAYM_CONTROL_ON);
 }
 
 boolean HvProcess_ChgIsFinishCond(void)
@@ -141,15 +141,17 @@ boolean HvProcess_ChgIsFinishCond(void)
     boolean res = FALSE;
     if(ChargeM_BatteryChargeIsFinish())
     {
-        rea = TRUE;
+        res = TRUE;
     }
+
+    return res;
 }
 
 void HvProcess_ChgFinishAction(void)
 {
     //置继电器断开计时为系统时间；置充电完成标志为1
     HvProcess_ChgInnerData.RelayOffTick = OSTimeGet();
-    HvProcess_ChgInnerData.chgFinishFlag = 1U;
+    HvProcess_ChgInnerData.chgFinishFlag = TRUE;
 }
 
 boolean HvProcess_ChgChargeConnectionCond(void)
@@ -191,9 +193,9 @@ boolean HvProcess_ChgFaultCond(void)
     uint32 nowTime = OSTimeGet(), delay = 3000UL;
     static uint32 lastTime = 0UL;
 
-    if (ChargeM_ChargeIsFault() = E_OK)
+    if (ChargeM_ChargeIsFault() == E_OK)
     {
-        if (ChargeM_ChargeIsFaultExcludeItem(items) = E_OK)
+        if (ChargeM_DiagnosisIsFaultFlagExcludeItems(items, 4U) == E_OK)
         {
             delay = 0UL;
         }
@@ -208,7 +210,7 @@ boolean HvProcess_ChgFaultCond(void)
         if (MS_GET_INTERNAL(lastTime, nowTime) >= delay)
         {
             res = TRUE;
-            lastTime = 0;
+            lastTime = 0UL;
         }
     }
     else
@@ -216,7 +218,7 @@ boolean HvProcess_ChgFaultCond(void)
         lastTime = 0UL;
     }
 
-    return TRUE;
+    return res;
 }
 
 void HvProcess_ChgFaultAction(void)
@@ -233,7 +235,7 @@ boolean HvProcess_ChgRelayOffDelayCond(void)
     >
     */
     boolean res = FALSE;
-    uint32 nowTIme = OSTimeGet(), delay = 5000UL;
+    uint32 nowTime = OSTimeGet(), delay = 5000UL;
     Current_CurrentType current = CurrentM_GetCurrentCalibrated(CURRENTM_CHANNEL_MAIN);
     if (CURRENT_IS_VALID(current))
     {
@@ -242,7 +244,7 @@ boolean HvProcess_ChgRelayOffDelayCond(void)
             delay = 0UL;
         }
     }
-    if(MS_Get_INTERNAL(HvProcess_ChgInnerData.RelayOffTick, nowTime) >= delay)
+    if(MS_GET_INTERNAL(HvProcess_ChgInnerData.RelayOffTick, nowTime) >= delay)
     {
         res = TRUE;
         HvProcess_ChgInnerData.RelayOffTick = OSTimeGet();
@@ -254,7 +256,7 @@ boolean HvProcess_ChgRelayOffDelayCond(void)
 void HvProcess_ChgRelayOffDelayAction(void)
 {
     //断开充电；继电器故障检查标志置FALSE
-    RelayM_Control(RELAYM_FN_CHARGE, RELAYM_CONTROL_OFF);
+    (void)RelayM_Control(RELAYM_FN_CHARGE, RELAYM_CONTROL_OFF);
     HvProcess_ChgInnerData.RelayFaultCheckFlag = FALSE;
 }
 
@@ -267,31 +269,31 @@ boolean HvProcess_ChgRestartAllowedCond(void)
     >判断是都延时结束
     */
     boolean res = FALSE;
-    APP_Tv100mvType bat_tv = HV_GetVoltage(HV_CHANNEL_BPOS), h1 = HV_GetVoltage(HV_CHANNEL_HV1), h2 = HV_GetVoltage(HV_CHANNEL_HV2);
-    uint32 nowTime = OSTimeGet();
-    static uint32 lastTime = 0;
+    App_Tv100mvType bat_tv = HV_GetVoltage(HV_CHANNEL_BPOS), h1 = HV_GetVoltage(HV_CHANNEL_HV1), h2 = HV_GetVoltage(HV_CHANNEL_HV2);
+    uint32 nowTime = OSTimeGet(), delay = 5000UL;
+    static uint32 lastTime = 0UL;
 
     if (Statistic_TotalVoltageIsValid(bat_tv))
     {
-        if (Statistic_TotalVoltageIsValid(b1))
+        if (Statistic_TotalVoltageIsValid(h1))
         {
-            if (Statistic_TotalVoltageIsValid(b2))
+            if (Statistic_TotalVoltageIsValid(h2))
             {
-                bat_tv = (APP_Tv100mvType)((uint32)bat_tv * (uint32)RelayMConfigData[RELAYM_FN_POSITIVE_MAIN].totalPercent / 100UL);
+                bat_tv = (App_Tv100mvType)((uint32)bat_tv * (uint32)RelayMConfigData[RELAYM_FN_POSITIVE_MAIN].totalPercent / 100UL);
                 if (h1 <= bat_tv && h2 <= bat_tv)
                 {
-                    delay = 0;
+                    //delay = 0UL;
                 }
             }
         }
     }
-    if (lastTime == 0)
+    if (lastTime == 0UL)
     {
         lastTime = nowTime;
     }
-    if (MS_Get_INTERNAL(lastTime, nowTime) >= delay)
+    if (MS_GET_INTERNAL(lastTime, nowTime) >= delay)
     {
-        lastTime = 0;
+        lastTime = 0UL;
         res = TRUE;
     }
 

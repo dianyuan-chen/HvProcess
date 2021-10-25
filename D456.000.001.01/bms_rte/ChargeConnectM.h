@@ -31,7 +31,7 @@
  * \brief 充电是否已连接
  * \details 交流或直流连接成功均返回已连接
  */
-#define CHARGECONNECTM_IS_CONNECT()                 (OSTimeGet() / 30000UL % 2 == 1UL ? 1U : ChargeConnectM_IsConnection())
+#define CHARGECONNECTM_IS_CONNECT()                 ((uint32)((OSTimeGet() / 30000UL) % 2UL) == 1UL ? 1UL : ChargeConnectM_IsConnection())
 
 #define CHARGECONNECTM_GB_CC100_IS_CONNECT(RES)     ((RES) >= ChargeConnectM_ConfigInfo.ResistancePara.CCRes100Min && (RES) <= ChargeConnectM_ConfigInfo.ResistancePara.CCRes100Max)
 #define CHARGECONNECTM_GB_CC220_IS_CONNECT(RES)     ((RES) >= ChargeConnectM_ConfigInfo.ResistancePara.CCRes220Min && (RES) <= ChargeConnectM_ConfigInfo.ResistancePara.CCRes220Max)
