@@ -93,15 +93,15 @@ boolean HvProcess_DchgStateStartCond(void)
             if(!HvProcess_DchgInnerData.RelayFaultCheckFlag && nowTime >= 300U)
             {
                 HvProcess_ChgInnerData.RelayFaultCheckFlag == TRUE;
-                if(Realym_GetActualStatus(RELAYM_FN_POSITIVE_MAIN) == RELAYM_ACTUAL_OFF)
+                if(RelayM_GetActualStatus(RELAYM_FN_POSITIVE_MAIN) == RELAYM_ACTUAL_OFF)
                 {
-                    if(Relaym_GetActualStatus(RELAYM_FN_PRECHARGE) == RELAYM_ACTUAL_OFF)
+                    if(RelayM_GetActualStatus(RELAYM_FN_PRECHARGE) == RELAYM_ACTUAL_OFF)
                     {
                         (void)RelayM_StartAdhesiveDetect(RELAYM_FN_POSITIVE_MAIN, NULL);
                         (void)RelayM_StartAdhesiveDetect(RELAYM_FN_PRECHARGE, NULL);
                     }
                 }
-                if(RELAYM_GetActualStatus(RELAYM_FN_CHARGE) == RELAYM_ACTUAL_OFF)
+                if(RelayM_GetActualStatus(RELAYM_FN_CHARGE) == RELAYM_ACTUAL_OFF)
                 {
                     (void)RelayM_StartAdhesiveDetect(RELAYM_FN_CHARGE, NULL);
                 }
@@ -199,7 +199,7 @@ boolean HvProcess_DchgFaultCond(void)
 
     if(DischargeM_DischargeIsFault() == E_OK)
     {
-        if(DischargeM_DiagnosisIsFaultFlagExculdeItems(items, 4U) == E_OK)
+        if(DischargeM_StartDiagIsFaultExcludeItems(items, 4U) == E_OK)
         {
             delay = 0U;
         }

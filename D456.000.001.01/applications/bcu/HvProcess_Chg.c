@@ -117,7 +117,7 @@ boolean HvProcess_ChgStateStartCond(void)
             {
                 if(HvProcess_ChgRelayIsNormal() == TRUE)
                 {
-                    if(ChargeM_chargeIsAllowed() == E_OK)
+                    if(ChargeM_ChargeIsAllowed() == E_OK)
                     {
                         res = TRUE;
                     }
@@ -197,7 +197,7 @@ boolean HvProcess_ChgFaultCond(void)
         {
             delay = 0UL;
         }
-        if (HvProcess_ChgFinishCond())
+        if (HvProcess_ChgIsFinishCond())
         {
             HvProcess_ChgFinishAction();
         }
