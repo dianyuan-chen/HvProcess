@@ -93,9 +93,9 @@ boolean HvProcess_DchgStateStartCond(void)
             if(!HvProcess_DchgInnerData.RelayFaultCheckFlag && nowTime >= 300U)
             {
                 HvProcess_ChgInnerData.RelayFaultCheckFlag == TRUE;
-                if(RELAYM_GetActualStatus(RELAYM_FN_POSITIVE_MAIN) == RELAYM_ACTUAL_OFF)
+                if(Realym_GetActualStatus(RELAYM_FN_POSITIVE_MAIN) == RELAYM_ACTUAL_OFF)
                 {
-                    if(RELAYM_GetActualStatus(RELAYM_FN_PRECHARGE) == RELAYM_ACTUAL_OFF)
+                    if(Relaym_GetActualStatus(RELAYM_FN_PRECHARGE) == RELAYM_ACTUAL_OFF)
                     {
                         (void)RelayM_StartAdhesiveDetect(RELAYM_FN_POSITIVE_MAIN, NULL);
                         (void)RelayM_StartAdhesiveDetect(RELAYM_FN_PRECHARGE, NULL);
