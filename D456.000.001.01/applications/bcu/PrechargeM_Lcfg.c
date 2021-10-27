@@ -22,8 +22,8 @@ const PrechargeM_ConfigInfoType PrechargeM_ConfigInfo[] =
     3000U, /**< timeout: 预充超时时间(ms) */
     V_TO_100MV(20U), /**< validVoltMin: 最低有效电压 */
     {
-        PRECHARGEM_FINISH_TYPE_PERCENT, /**< type: 预充完成条件类型 */
-        PERCENT_TO_THOUSAND(90U), /**< value: 预充完成值,若预充类型为延时，此值必须小于“预充超时时间” */
+        PRECHARGEM_FINISH_TYPE_DELAY, /**< type: 预充完成条件类型 */
+        2000U, /**< value: 预充完成值,若预充类型为延时，此值必须小于“预充超时时间” */
         (Current_CurrentType)CURRENT_INVALID_VALUE, /**< current: 完成电流值(0.1A)，输入CURRENT_INVALID_VALUE时表示不检查电流值 */
     },
     UserStrategy_GetMcuVoltage, /**< getMcuVoltFunc: 获取MCU总压接口 */

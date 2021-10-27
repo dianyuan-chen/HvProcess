@@ -93,7 +93,8 @@ boolean HvProcess_ChgStateStartCond(void)
     boolean res = FALSE;
     uint8 wakeup = RuntimeM_GetWakeSignal();
     uint32 nowTime = OSTimeGet();
-    if(CHARGECONNECTM_IS_CONNECT() == E_OK && wakeup)
+
+    if(CHARGECONNECTM_IS_CONNECT() && wakeup > 0U)
     {
         if(HvProcess_GetDchgState() == HVPROCESS_DCHG_START)
         {

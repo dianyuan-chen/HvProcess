@@ -27,53 +27,25 @@ const uint16 VcuComm_StageMax = (uint16)VCUCOMM_STAGE_MAX;
 const uint8 VcuComm_SendIPduNum = (uint8)VCUCOMM_SEND_IPDU_CFG_NUM;
 const VcuComm_SendIPduCfgType VcuComm_IPduSendConfigInfo[VCUCOMM_SEND_IPDU_CFG_NUM] = {
     {
-        (uint16)VCUCOMM_TX_IPDU_MSG_0x1E1, /**< IPdu */
-        8U, /**< Length */
-        100U, /**< Cycle */
-        NULL, /**< CondFunc */
-        VcuComm_GetMsgData0x1E1Cbk, /**< Func */
+
     },
     {
-        (uint16)VCUCOMM_TX_IPDU_MSG_0x1E2, /**< IPdu */
-        8U, /**< Length */
-        100U, /**< Cycle */
-        NULL, /**< CondFunc */
-        VcuComm_GetMsgData0x1E2Cbk, /**< Func */
+
     },
     {
-        (uint16)VCUCOMM_TX_IPDU_MSG_0x1E3, /**< IPdu */
-        8U, /**< Length */
-        100U, /**< Cycle */
-        NULL, /**< CondFunc */
-        VcuComm_GetMsgData0x1E3Cbk, /**< Func */
+
     },
     {
-        (uint16)VCUCOMM_TX_IPDU_MSG_0x1E4, /**< IPdu */
-        8U, /**< Length */
-        100U, /**< Cycle */
-        NULL, /**< CondFunc */
-        VcuComm_GetMsgData0x1E4Cbk, /**< Func */
+
     },
     {
-        (uint16)VCUCOMM_TX_IPDU_MSG_0x1E5, /**< IPdu */
-        8U, /**< Length */
-        100U, /**< Cycle */
-        NULL, /**< CondFunc */
-        VcuComm_GetMsgData0x1E5Cbk, /**< Func */
+
     },
     {
-        (uint16)VCUCOMM_TX_IPDU_MSG_0x1E6, /**< IPdu */
-        8U, /**< Length */
-        100U, /**< Cycle */
-        NULL, /**< CondFunc */
-        VcuComm_GetMsgData0x1E6Cbk, /**< Func */
+
     },
     {
-        (uint16)VCUCOMM_TX_IPDU_MSG_0x1E7, /**< IPdu */
-        8U, /**< Length */
-        100U, /**< Cycle */
-        NULL, /**< CondFunc */
-        VcuComm_GetMsgData0x1E7Cbk, /**< Func */
+
     },
 };
 

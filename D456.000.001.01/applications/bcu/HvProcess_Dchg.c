@@ -21,7 +21,9 @@
 #include "Statistic.h"
 
 static HvProcess_DchgInnerDataType HvProcess_DchgInnerData;
-
+uint8 pmain = 0, precharge = 0, charge = 0;
+uint8 Nmain = 0, Nprecharge = 0, Ncharge = 0;
+uint8 normal = 0;
 void HvProcess_DchgInit(Async_LooperType *looper)
 {
     (void)looper;
@@ -57,12 +59,18 @@ void HvProcess_DchgPoll(void)
 static boolean HvProcess_DchgRelayIsNormal(void)
 {
     boolean res = FALSE;
-    if(RELAYM_DIAGNOSIS_IS_NORMAL(RelayM_GetDiagnosisStatus(RELAYM_FN_POSITIVE_MAIN)))
+    pmain = RelayM_GetDiagnosisStatus(RELAYM_FN_POSITIVE_MAIN);
+    precharge = RelayM_GetDiagnosisStatus(RELAYM_FN_PRECHARGE);
+    charge = RelayM_GetDiagnosisStatus(RELAYM_FN_CHARGE);
+    if(RELAYM_DIAGNOSIS_IS_NORMAL(pmain))
     {
-        if(RELAYM_DIAGNOSIS_IS_NORMAL(RelayM_GetDiagnosisStatus(RELAYM_FN_PRECHARGE)))
+        Nmain = 1U;
+        if(RELAYM_DIAGNOSIS_IS_NORMAL(precharge))
         {
-            if(RELAYM_DIAGNOSIS_IS_NORMAL(RelayM_GetDiagnosisStatus(RELAYM_FN_CHARGE)))
+            Nprecharge = 1U;
+            if(RELAYM_DIAGNOSIS_IS_NORMAL(charge))
             {
+                Ncharge = 1U;
                 res = TRUE;
             }
         }
@@ -105,14 +113,23 @@ boolean HvProcess_DchgStateStartCond(void)
                 {
                     (void)RelayM_StartAdhesiveDetect(RELAYM_FN_CHARGE, NULL);
                 }
+                nowTime = OSTimeGet();
             }
             if (HvProcess_DchgInnerData.RelayFaultCheckFlag == TRUE)
             {
-                if (HvProcess_DchgRelayIsNormal())
+                normal = HvProcess_DchgRelayIsNormal();
+                if (normal)
                 {
                     if (DischargeM_DischargeIsAllowed() == E_OK && dccOn != STD_LOW)
                     {
                         res = TRUE;
+                    }
+                }
+                else
+                {
+                    if (MS_GET_INTERNAL(nowTime, OSTimeGet()) >= 500U)
+                    {
+                        HvProcess_DchgInnerData.RelayFaultCheckFlag = FALSE;
                     }
                 }
             }
@@ -264,9 +281,8 @@ boolean HvProcess_DchgRestartAllowedCond(void)
         >判断是否到达延时时间
     */
     boolean res = FALSE;
-    uint32 delay = 30000UL;
     App_Tv100mvType bat_tv = HV_GetVoltage(HV_CHANNEL_BPOS), hv1 = HV_GetVoltage(HV_CHANNEL_HV1), hv2 = HV_GetVoltage(HV_CHANNEL_HV2);
-    uint32 nowTime = OSTimeGet();
+    uint32 delay = 30000UL,nowTime = OSTimeGet();
     static uint32 lastTime = 0UL;
 
     if (Statistic_TotalVoltageIsValid(bat_tv))
@@ -287,7 +303,7 @@ boolean HvProcess_DchgRestartAllowedCond(void)
     {
         lastTime = nowTime;
     }
-    if (MS_GET_INTERNAL(lastTime, nowTime) > delay)
+    if (MS_GET_INTERNAL(lastTime, nowTime) >= delay)
     {
         lastTime = 0UL;
         res = TRUE;
