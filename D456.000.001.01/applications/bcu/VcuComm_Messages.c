@@ -279,37 +279,214 @@ void VcuComm_GetStatusMsg_0x208(uint8 *buf, uint16 *Length) {
 
 void VcuComm_GetMsgData0x1E1Cbk(uint8 *buf, uint16 *Length)
 {
+    sint16 sval;
+    sint16 index = 0U, uval;
+    //总压
+    uval = Statistic_GetBcu100mvTotalVoltage();
+    WRITE_LT_UINT16(buf, index, uval);
+    //总电流
+    sval = CurrentM_GetCurrentCalibrated(CURRENTM_CHANNEL_MAIN);
+    if (CurrentM_IsValidCurrent(sval))
+    {
+        uval = (uint16)(-sval);
+    }
+    else
+    {
+        uval = 0xFFFFU;
+    }
+    WRITE_LT_UINT16(buf, index, uval);
+    //SOC
+    WRITE_LT_UINT16(buf, index, Soc_Get());
+    //报警码
+    uval = VcuComm_GetFaultCode();
+    WRITE_LT_UINT16(buf, index, uval);
 
+    *Length = index;
 }
 
 void VcuComm_GetMsgData0x1E2Cbk(uint8 *buf, uint16 *Length)
 {
+    uint16 temp, index = 0U;
+    //报警等级
+    temp = Diagnosis_GetDiagLevelMax();
+    WRITE_LT_UINT16(buf, index, temp);
+    //最高单体电压
+    temp = Statistic_GetBcuHv(0U);
+    WRITE_LT_UINT16(buf, index, temp);
+    //最高单体电压串号
+    temp = (uint16)Statistic_GetBcuHvLogicIndex(0U) + 1U;
+    WRITE_LT_UINT16(buf, index, temp);
+    //最低单体电压
+    temp = Statistic_GetBcuLv(0U);
+    WRITE_LT_UINT16(buf, index, temp);
 
+    *Length = index;
 }
 
 void VcuComm_GetMsgData0x1E3Cbk(uint8 *buf, uint16 *Length)
 {
+    uint16 temp, index = 0U;
+    //最低单体电压电压串号
+    temp = Statistic_GetBcuLvLogicIndex(0U) + 1;
+    WRITE_LT_UINT16(buf, index, temp);
+    //最高温度
+    temp = Statistic_GetBcuHt(0U);
+    WRITE_LT_UINT16(buf, index, temp);
+    //最高温度编号
+    temp = Statistic_GetBcuHtLogicIndex(0U) + 1;
+    WRITE_LT_UINT16(buf, index, temp);
+    //最低温度
+    temp = Statistic_GetBcuLt(0U);
+    WRITE_LT_UINT16(buf, index, temp);
 
+    *Length = index;
 }
 
 void VcuComm_GetMsgData0x1E4Cbk(uint8 *buf, uint16 *Length)
 {
+    uint16 temp, index = 0U;
+    //最低温度编号
+    temp = Statistic_GetBcuLtLogicIndex(0U) + 1;
+    WRITE_LT_UINT16(buf, index, temp);
+    //正极绝缘阻值
+    temp = Insu_GetPositive();
+    WRITE_LT_UINT16(buf, index, temp);
+    //负极绝缘阻值
+    temp = Insu_GetNegative();
+    WRITE_LT_UINT16(buf, index, temp);
+    //系统状态
+    if (CHARGECONNECTM_ISCONNECT())
+    {
+        temp = 1;
+    }
+    else
+    {
+        temp = 0;
+    }
+    WRITE_LT_UINT16(buf, index, temp);
 
+    *Length = index;
 }
 
 void VcuComm_GetMsgData0x1E5Cbk(uint8 *buf, uint16 *Length)
 {
+    Charge_ChargeType type = ChargeConnectM_GetConnectType();
+    uint16 val16 = 0U, uval = 0U, volt, index = 0U;
+    sint16 current = PowerM_GetCurrent(POWERM_CUR_CHARGE_DC);
+    volt = Power_GetChargeVoltage(type);
+    if (CHARGECONNECTM_IS_CONNECT())
+    {
+        if (ChargeM_ChargeIsAllowed())
+        {
+            uval = (uint16)current;
+            val16 = volt;
+        }
+    }
+    //充电请求电压
+    WRITE_LT_UINT16(buf, index, val16);
+    //充电请求电流
+    WRITE_LT_UINT16(buf, index, uval);
+    //充电机输出电压
+    uval = ChargerComm_GetChargerOutputHV();
+    WRITE_LT_UINT16(buf, index, uval);
+    //充电机输出电流
+    current = ChargerComm_GetChargerOutputCurrent();
+    uval = (uint16)current;
+    WRITE_LT_UINT16(buf, index, uval);
 
+    *Length = index;
 }
 
 void VcuComm_GetMsgData0x1E6Cbk(uint8 *buf, uint16 *Length)
 {
+    uint32 time;
+    uint16 temp, index = 0;
+    uint8 i;
+    Diagnosis_ItemType item = DIAGNOSIS_ITEM_CHG_HV;
+    //已充电时间
+    time = Statistic_GetEclipseChargeTime();
+    temp = (uint16)S_TO_MIN(time);
+    WRITE_LT_UINT16(buf, index, temp);
+    //故障标志1
+    temp = 0U;
+    for (i = 0U; i <= 15U; i++)
+    {
+        if (Diagnosis_GetLevel(item) >= 1U)//若有警报发生
+        {
+            temp |= (uint16)0x1U << i;
+        }
+        item = (Diagnosis_ItemType)((uint16)item + 1U);//下一item
+    }
+    WRITE_LT_UINT16(buf, index, temp);
+    //故障标志2
+    temp = 0U;
+    for (i = 0; i <= 15U; i++)
+    {
+        if (Diagnosis_GetLevel(item) >= 1U)
+        {
+            temp |= (uint16)0x1U << i;
+        }
+        item = (Diagnosis_ItemType)((uint16)item + 1U);
+    }
+    WRITE_LT_UINT16(buf, index, temp);
+    //故障标志3
+    temp = 0U;
+    for (i = 0; i <= 15U; i++)
+    {
+        if (Diagnosis_GetLevel(item) >= 1U)
+        {
+            temp |= (uint16)0x1U << i;
+        }
+        item = (Diagnosis_ItemType)((uint16)item + 1U);
+        if (item > DIAGNOSIS_ITEM_SUPPLY_VOL_HIGH && item < DIAGNOSIS_ITEM_VOLT_LINE)
+        {
+            item = DIAGNOSIS_ITEM_VOLT_LINE;
+        }
+    }
+    WRITE_LT_UINT16(buf, index, temp);
 
+    *Length = index;
 }
 
 void VcuComm_GetMsgData0x1E7Cbk(uint8 *buf, uint16 *Length)
 {
+    uint16 temp = 0U, index = 0U;
+    sint16 current;
+    uint8 i;
+    Diagnosis_ItemType item = DIAGNOSIS_ITEM_CHGSCKTMP_AC_BN;
+    //故障标志4
+    for (i = 0; i <= 15U; i++)
+    {
+        if (Diagnosis_GetLevel(item) >= 1U)
+        {
+            temp = (uint16)0x1U << i;
+        }
+        item = (Diagnosis_ItemType)((uint16)item + 1U);
+    }
+    WRITE_LT_UINT16(buf, index, temp);
+    //故障标志5
+    temp = 0U;
+    for (i = 0; i <= 15U; i++)
+    {
+        if (Diagnosis_GetLevel(item) >= 1U)
+        {
+            temp |= (uint16)0x1U << i;
+        }
+        item = (Diagnosis_ItemType)((uint16)item + 1U);
+        if (item > DIAGNOSIS_ITEM_CRASH_FAULT)
+        {
+            break;
+        }
+    }
+    WRITE_LT_UINT16(buf, index, temp);
+    //电池组总电流（无符号）
+    current = CurrentM_GetCurrentCalibrated(CURRENTM_CHANNEL_MAIN);
+    temp = (uint16)abs(current);
+    WRITE_LT_UINT16(buf, index, temp);
+    //预留
+    WRITE_LT_UINT16(buf, index, 0xFFFFU);
 
+    *Length = index;
 }
 
 

@@ -27,25 +27,53 @@ const uint16 VcuComm_StageMax = (uint16)VCUCOMM_STAGE_MAX;
 const uint8 VcuComm_SendIPduNum = (uint8)VCUCOMM_SEND_IPDU_CFG_NUM;
 const VcuComm_SendIPduCfgType VcuComm_IPduSendConfigInfo[VCUCOMM_SEND_IPDU_CFG_NUM] = {
     {
-
+        (uint16)VCUCOMM_TX_IPDU_MSG_0x1E1;
+        8U;
+        100U;
+        NULL;
+        VcuComm_GetMsgData0x1E1Cbk;
     },
     {
-
+        (uint16)VCUCOMM_TX_IPDU_MSG_0x1E2;
+        8U;
+        100U;
+        NULL;
+        VcuComm_GetMsgData0x1E2Cbk;
     },
     {
-
+        (uint16)VCUCOMM_TX_IPDU_MSG_0x1E3;
+        8U;
+        100U;
+        NULL;
+        VcuComm_GetMsgData0x1E3;
     },
     {
-
+        (uint16)VCUCOMM_TX_IPDU_MSG_0x1E4;
+        8U;
+        100U;
+        NULL;
+        VcuComm_GetMsgData0x1E4;
     },
     {
-
+        (uint16)VCUCOMM_TX_IPDU_MSG_0x1E5;
+        8U;
+        100U;
+        NULL;
+        VcuComm_GetMsgData0x1E5;
     },
     {
-
+        (uint16)VCUCOMM_TX_IPDU_MSG_0x1E6;
+        8U;
+        100U;
+        NULL;
+        VcuComm_GetMsgData0x1E6;
     },
     {
-
+        (uint16)VCUCOMM_TX_IPDU_MSG_0x1E7;
+        8U;
+        100U;
+        NULL;
+        VcuComm_GetMsgData0x1E7;
     },
 };
 
